@@ -1,0 +1,18 @@
+services:
+  blog:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      # SQLite lives on a persistent volume mounted at /data.
+      DATABASE_URL: "file:/data/prod.db"
+      # Override these in a server-side .env or your shell before deploy.
+      ADMIN_PASSWORD: "${ADMIN_PASSWORD:-margin-2026}"
+      AUTH_SECRET: "${AUTH_SECRET:-change-this-to-a-long-random-string-before-deploy}"
+    volumes:
+      # Named volume keeps the database across container rebuilds.
+      - blog-data:/data
+    restart: unless-stopped
+
+volumes:
+  blog-data:
