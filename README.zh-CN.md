@@ -1,18 +1,46 @@
-# Ryker Editorial Blog
+<h1 align="center">Ryker Editorial Blog</h1>
 
-[English](./README.md) | 简体中文
+<p align="center">
+  <strong>一个记录 AI 工程、提示词、Agent 与软件构建手艺的个人编辑型博客。</strong>
+</p>
+
+<p align="center">
+  <a href="./README.md">English</a> · 简体中文
+</p>
+
+<p align="center">
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-14-111111?style=flat-square&logo=nextdotjs">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white">
+  <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind-CSS-38BDF8?style=flat-square&logo=tailwindcss&logoColor=white">
+  <img alt="Prisma" src="https://img.shields.io/badge/Prisma-SQLite-2D3748?style=flat-square&logo=prisma">
+</p>
 
 一个用于记录 AI 工程、提示词、Agent 和软件构建手艺的个人编辑型博客。项目包含面向读者的前台阅读体验，也把私有写作后台保留在同一个 Next.js 应用里。
 
 ## 预览
 
-### 桌面端
-
-![桌面端首页](./public/screenshots/desktop-home.jpg)
-
-### 移动端
-
-![移动端首页](./public/screenshots/mobile-home.jpg)
+<table>
+  <tr>
+    <td width="50%">
+      <strong>桌面端 · 首屏</strong><br>
+      <img src="./public/screenshots/desktop-hero.png" alt="桌面端首屏">
+    </td>
+    <td width="50%">
+      <strong>桌面端 · 近期文章</strong><br>
+      <img src="./public/screenshots/desktop-recent-writing.png" alt="桌面端近期文章">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <strong>桌面端 · 精选文章</strong><br>
+      <img src="./public/screenshots/desktop-featured.png" alt="桌面端精选文章">
+    </td>
+    <td width="50%">
+      <strong>移动端 · 首屏</strong><br>
+      <img src="./public/screenshots/mobile-hero.png" alt="移动端首屏">
+    </td>
+  </tr>
+</table>
 
 ## 功能
 

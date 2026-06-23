@@ -1,18 +1,46 @@
-# Ryker Editorial Blog
+<h1 align="center">Ryker Editorial Blog</h1>
 
-English | [简体中文](./README.zh-CN.md)
+<p align="center">
+  <strong>An editorial personal blog for AI engineering, prompting, agents, and thoughtful software craft.</strong>
+</p>
+
+<p align="center">
+  English · <a href="./README.zh-CN.md">简体中文</a>
+</p>
+
+<p align="center">
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-14-111111?style=flat-square&logo=nextdotjs">
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white">
+  <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind-CSS-38BDF8?style=flat-square&logo=tailwindcss&logoColor=white">
+  <img alt="Prisma" src="https://img.shields.io/badge/Prisma-SQLite-2D3748?style=flat-square&logo=prisma">
+</p>
 
 An editorial personal blog for writing about AI engineering, prompting, agents, and the craft of building thoughtful software. It includes a polished public reading experience and a private authoring admin inside the same Next.js application.
 
 ## Preview
 
-### Desktop
-
-![Desktop homepage](./public/screenshots/desktop-home.jpg)
-
-### Mobile
-
-![Mobile homepage](./public/screenshots/mobile-home.jpg)
+<table>
+  <tr>
+    <td width="50%">
+      <strong>Desktop · Hero</strong><br>
+      <img src="./public/screenshots/desktop-hero.png" alt="Desktop hero screen">
+    </td>
+    <td width="50%">
+      <strong>Desktop · Recent Writing</strong><br>
+      <img src="./public/screenshots/desktop-recent-writing.png" alt="Desktop recent writing screen">
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <strong>Desktop · Featured</strong><br>
+      <img src="./public/screenshots/desktop-featured.png" alt="Desktop featured screen">
+    </td>
+    <td width="50%">
+      <strong>Mobile · Hero</strong><br>
+      <img src="./public/screenshots/mobile-hero.png" alt="Mobile hero screen">
+    </td>
+  </tr>
+</table>
 
 ## Features
 
