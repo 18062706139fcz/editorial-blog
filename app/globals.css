@@ -40,6 +40,73 @@
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
+  .night-range {
+    --progress: 0%;
+    height: 1.75rem;
+    width: 100%;
+    cursor: pointer;
+    appearance: none;
+    background: transparent;
+  }
+
+  .night-range::-webkit-slider-runnable-track {
+    height: 0.5rem;
+    border-radius: 999px;
+    background: linear-gradient(
+      90deg,
+      #dd3f35 0%,
+      #ff756c var(--progress),
+      rgba(255, 255, 255, 0.12) var(--progress),
+      rgba(255, 255, 255, 0.12) 100%
+    );
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .night-range::-webkit-slider-thumb {
+    appearance: none;
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-top: -0.325rem;
+    border: 3px solid #f7f0e8;
+    border-radius: 999px;
+    background: #dd3f35;
+    box-shadow:
+      0 0 0 0.35rem rgba(221, 63, 53, 0.16),
+      0 0.75rem 1.75rem -0.8rem rgba(221, 63, 53, 0.9);
+    transition:
+      transform 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+  .night-range:hover::-webkit-slider-thumb,
+  .night-range:focus-visible::-webkit-slider-thumb {
+    transform: scale(1.16);
+    box-shadow:
+      0 0 0 0.55rem rgba(221, 63, 53, 0.22),
+      0 0.9rem 2rem -0.8rem rgba(221, 63, 53, 1);
+  }
+
+  .night-range::-moz-range-track {
+    height: 0.5rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .night-range::-moz-range-progress {
+    height: 0.5rem;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #dd3f35, #ff756c);
+  }
+
+  .night-range::-moz-range-thumb {
+    width: 0.85rem;
+    height: 0.85rem;
+    border: 3px solid #f7f0e8;
+    border-radius: 999px;
+    background: #dd3f35;
+    box-shadow: 0 0 0 0.35rem rgba(221, 63, 53, 0.16);
+  }
 }
 
 @keyframes record-sheen {
@@ -66,6 +133,18 @@
   50% {
     transform: scaleY(1);
     opacity: 0.88;
+  }
+}
+
+@keyframes signal-dot {
+  0%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.72);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1);
   }
 }
 

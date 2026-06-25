@@ -64,7 +64,7 @@ export const hiddenRooms: HiddenRoom[] = [
     eyebrow: "夜间值班",
     title: "凌晨的页面会小声说话。",
     summary:
-      "今晚只开一盏小灯，放三首陈粒。唱片慢慢转，把白天没说完的话留给回声。",
+      "夜里只开一盏小灯，放三首陈粒。像在沙漠边听风，把没说出口的喜欢放进回声里。",
     coordinate: "02:17 / 屏幕亮度 34%",
     returnLabel: "关掉台灯",
     fragments: ["低频噪声", "未保存草稿", "键盘回声", "窗口外的蓝黑色"],

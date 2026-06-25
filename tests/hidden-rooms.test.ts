@@ -76,8 +76,8 @@ test("night radio uses a full-bleed dark stage with Chen Li tracks", () => {
   assert.match(nightRadio, /种种/);
   assert.match(nightRadio, /artist:\s*"陈粒"/);
   assert.match(nightRadio, /当前曲目：/);
-  assert.match(config, /今晚只开一盏小灯/);
-  assert.match(config, /放三首陈粒/);
+  assert.match(config, /夜里只开一盏小灯/);
+  assert.match(config, /沙漠边听风/);
   assert.equal(nightRadio.includes("世界正中"), false);
   assert.equal(config.includes("不是 dark mode"), false);
 });
@@ -86,6 +86,7 @@ test("night radio uses real Chen Li music embeds instead of synthetic noise", ()
   const nightRadio = source("../components/NightRadio.tsx");
 
   assert.match(nightRadio, /\/api\/music\/netease-url/);
+  assert.match(nightRadio, /\/api\/music\/netease-lyric/);
   assert.match(nightRadio, /29357047/);
   assert.match(nightRadio, /30431370/);
   assert.match(nightRadio, /2749429518/);
@@ -105,11 +106,11 @@ test("night radio record and play control have motion-oriented styling", () => {
   assert.match(nightRadio, /data-turntable/);
   assert.match(nightRadio, /data-tonearm/);
   assert.match(nightRadio, /data-lyric-panel/);
-  assert.match(nightRadio, /captionCopy/);
+  assert.match(nightRadio, /currentLyric/);
   assert.match(nightRadio, /max-w-\[31rem\]/);
-  assert.match(nightRadio, /motion-safe:animate-\[spin_11s_linear_infinite\]/);
+  assert.match(nightRadio, /motion-safe:animate-\[spin_18s_linear_infinite\]/);
   assert.match(nightRadio, /motion-safe:animate-\[record-sheen/);
-  assert.match(nightRadio, /motion-safe:animate-\[equalizer/);
+  assert.match(nightRadio, /motion-safe:animate-\[signal-dot/);
   assert.equal(nightRadio.includes("lg:-mr-24"), false);
   assert.equal(nightRadio.includes("absolute left-1/2 top-1/2 h-3 w-3"), false);
   assert.equal(nightRadio.includes("rounded-full bg-[#dd3f35] px-5"), false);
@@ -124,6 +125,8 @@ test("night radio progress is driven by the real audio element", () => {
   assert.match(nightRadio, /onTimeUpdate/);
   assert.match(nightRadio, /currentTime/);
   assert.match(nightRadio, /duration/);
+  assert.match(nightRadio, /type="range"/);
+  assert.match(nightRadio, /aria-label="拖动播放进度"/);
   assert.match(nightRadio, /audioRef\.current\.play/);
 });
 
@@ -136,6 +139,18 @@ test("netease music url API only proxies the approved Chen Li tracks", () => {
   assert.match(route, /allowedTracks/);
   assert.match(route, /music\.163\.com\/api\/song\/enhance\/player\/url/);
   assert.match(route, /replace\(\s*\/\^http:\/,\s*"https:"\s*\)/);
+});
+
+test("netease lyric API parses timed lyrics for the approved Chen Li tracks", () => {
+  const route = source("../app/api/music/netease-lyric/route.ts");
+
+  assert.match(route, /29357047/);
+  assert.match(route, /30431370/);
+  assert.match(route, /2749429518/);
+  assert.match(route, /allowedTracks/);
+  assert.match(route, /music\.163\.com\/api\/song\/lyric/);
+  assert.match(route, /parseLrc/);
+  assert.match(route, /creditPattern/);
 });
 
 test("night route opts the global chrome into a dark surface", () => {

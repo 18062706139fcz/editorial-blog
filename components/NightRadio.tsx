@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { MouseEvent } from "react";
+import type { CSSProperties } from "react";
 import Link from "next/link";
 import type { HiddenRoom } from "@/lib/hidden-rooms";
 
@@ -12,8 +12,8 @@ type TrackSource = {
   type: string | null;
 };
 
-type CaptionLine = {
-  at: number;
+type LyricLine = {
+  time: number;
   text: string;
 };
 
@@ -26,16 +26,9 @@ const tracks = [
     durationSeconds: 253,
     neteaseId: "29357047",
     coverUrl:
-      "https://p2.music.126.net/cpoUinrExafBHL5Nv5iDHQ==/109951166361218466.jpg",
+      "https://p2.music.126.net/VuJFMbXzpAProbJPoXLv7g==/7721870161993398.jpg",
     accent: "#d9473f",
     note: "网易云可免费播放的陈粒曲目，走真实音频源。",
-    captions: [
-      { at: 0, text: "先把房间调暗一点，让声音慢慢靠近。" },
-      { at: 34, text: "有些念头不必立刻回答，先和旋律待一会儿。" },
-      { at: 82, text: "奇妙的不是能力，是还愿意相信一点微光。" },
-      { at: 142, text: "白天没有收好的情绪，今晚交给唱片暂存。" },
-      { at: 206, text: "等这一面转完，再决定要不要继续往前。" },
-    ],
   },
   {
     title: "正趣果上果",
@@ -48,13 +41,6 @@ const tracks = [
       "https://p2.music.126.net/VuJFMbXzpAProbJPoXLv7g==/7721870161993398.jpg",
     accent: "#c8501e",
     note: "来自《如也》的《正趣果上果》，用当前可用音频 URL 播放。",
-    captions: [
-      { at: 0, text: "偏一点的趣味，也可以是很正经的答案。" },
-      { at: 30, text: "红色信号慢慢亮起，像一颗不急着成熟的果。" },
-      { at: 76, text: "把漂亮和古怪放在一起，夜里会更合拍。" },
-      { at: 132, text: "不解释太多，旋律会替它找到自己的方向。" },
-      { at: 188, text: "这一首适合给固执的灵感留一张椅子。" },
-    ],
   },
   {
     title: "种种",
@@ -67,17 +53,10 @@ const tracks = [
       "https://p1.music.126.net/jeWHIkiTkBglJKxte7p6JA==/109951172059186762.jpg",
     accent: "#dd3f35",
     note: "使用《十年自选》里的可播放版本。",
-    captions: [
-      { at: 0, text: "那些没有归类的情绪，夜里会自己排成队。" },
-      { at: 28, text: "种种不是总结，是还没完全放下的回声。" },
-      { at: 72, text: "听到这里，可以先不判断它属于哪一种。" },
-      { at: 120, text: "有些旧事不需要翻新，只要轻轻放回原处。" },
-      { at: 162, text: "收尾的时候，让安静比答案多停一秒。" },
-    ],
   },
 ];
 
-const visualizerBars = [35, 62, 48, 78, 54, 70, 42, 86, 50, 66, 40, 74];
+const signalDots = [0, 90, 180, 270, 360, 450, 540, 630];
 
 function formatTime(value: number) {
   if (!Number.isFinite(value) || value <= 0) return "0:00";
@@ -86,10 +65,12 @@ function formatTime(value: number) {
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
-function selectCaption(lines: CaptionLine[], time: number) {
-  let selected = lines[0]?.text ?? "";
-  for (const line of lines) {
-    if (time >= line.at) selected = line.text;
+function selectLyricIndex(lines: LyricLine[], time: number) {
+  if (lines.length === 0) return -1;
+
+  let selected = 0;
+  for (let index = 0; index < lines.length; index += 1) {
+    if (time + 0.2 >= lines[index].time) selected = index;
   }
   return selected;
 }
@@ -99,20 +80,34 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
   const [playing, setPlaying] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [source, setSource] = useState<TrackSource | null>(null);
+  const [lyrics, setLyrics] = useState<LyricLine[]>([]);
   const [loadingSource, setLoadingSource] = useState(true);
+  const [loadingLyrics, setLoadingLyrics] = useState(true);
   const [sourceError, setSourceError] = useState("");
+  const [lyricError, setLyricError] = useState("");
   const [playbackError, setPlaybackError] = useState("");
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(tracks[0].durationSeconds);
   const activeTrack = tracks[activeIndex];
   const progress =
     duration > 0 ? Math.min(100, (currentTime / duration) * 100) : 0;
-  const recordGlow = playing ? "opacity-100" : "opacity-25";
-  const recordNeedle = playing ? "rotate-[7deg]" : "-rotate-[9deg]";
+  const hasPlaybackPosition = playing || currentTime > 0;
+  const recordGlow = hasPlaybackPosition ? "opacity-90" : "opacity-25";
+  const recordNeedle = hasPlaybackPosition ? "rotate-[7deg]" : "-rotate-[9deg]";
   const currentMusicCopy = `当前曲目：${activeTrack.artist}《${activeTrack.title}》`;
-  const captionCopy = playing
-    ? selectCaption(activeTrack.captions, currentTime)
-    : "按下播放，让一句夜里的字幕慢慢浮上来。";
+  const currentLyricIndex =
+    hasPlaybackPosition && lyrics.length > 0 ? selectLyricIndex(lyrics, currentTime) : -1;
+  const currentLyric = currentLyricIndex >= 0 ? lyrics[currentLyricIndex] : null;
+  const previousLyric = currentLyricIndex > 0 ? lyrics[currentLyricIndex - 1] : null;
+  const nextLyric =
+    currentLyricIndex >= 0 && currentLyricIndex < lyrics.length - 1
+      ? lyrics[currentLyricIndex + 1]
+      : null;
+  const lyricEmptyCopy = lyricError
+    ? lyricError
+    : loadingLyrics
+      ? "歌词加载中。"
+      : "按下播放，歌词会跟着时间浮上来。";
 
   useEffect(() => {
     let cancelled = false;
@@ -121,9 +116,12 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
     setCurrentTime(0);
     setDuration(activeTrack.durationSeconds);
     setLoadingSource(true);
+    setLoadingLyrics(true);
     setSourceError("");
+    setLyricError("");
     setPlaybackError("");
     setSource(null);
+    setLyrics([]);
     audioRef.current?.pause();
 
     fetch(`/api/music/netease-url?id=${activeTrack.neteaseId}`)
@@ -145,6 +143,26 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
       })
       .finally(() => {
         if (!cancelled) setLoadingSource(false);
+      });
+
+    fetch(`/api/music/netease-lyric?id=${activeTrack.neteaseId}`)
+      .then(async (response) => {
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.error ?? "歌词暂时不可用。");
+        }
+        return payload as { lines: LyricLine[] };
+      })
+      .then((payload) => {
+        if (cancelled) return;
+        setLyrics(payload.lines);
+      })
+      .catch((error: Error) => {
+        if (cancelled) return;
+        setLyricError(error.message);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingLyrics(false);
       });
 
     return () => {
@@ -173,15 +191,13 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
     setActiveIndex(index);
   }
 
-  function seekTo(event: MouseEvent<HTMLButtonElement>) {
+  function seekTo(nextTime: number) {
     const audio = audioRef.current;
     if (!audio || duration <= 0) return;
 
-    const rect = event.currentTarget.getBoundingClientRect();
-    const ratio = (event.clientX - rect.left) / rect.width;
-    const nextTime = Math.max(0, Math.min(duration, duration * ratio));
-    audio.currentTime = nextTime;
-    setCurrentTime(nextTime);
+    const clampedTime = Math.max(0, Math.min(duration, nextTime));
+    audio.currentTime = clampedTime;
+    setCurrentTime(clampedTime);
   }
 
   return (
@@ -232,17 +248,27 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
                 className="mt-8 rounded-[8px] border border-white/10 bg-[#09090b]/72 p-4"
               >
                 <p className="font-mono text-[10px] uppercase tracking-label text-white/35">
-                  lyric trace
+                  netease lyric
                 </p>
-                <p
-                  className={`mt-3 min-h-[4.5rem] font-serif text-2xl font-light leading-snug transition-colors duration-300 ${
-                    playing ? "text-[#f7f0e8]" : "text-white/42"
-                  }`}
-                >
-                  {captionCopy}
-                </p>
+                {currentLyric ? (
+                  <div className="mt-3 min-h-[7.25rem]">
+                    <p className="min-h-5 truncate text-sm leading-5 text-white/28">
+                      {previousLyric?.text ?? ""}
+                    </p>
+                    <p className="mt-2 font-serif text-[1.65rem] font-light leading-snug text-[#f7f0e8]">
+                      {currentLyric.text}
+                    </p>
+                    <p className="mt-3 min-h-5 truncate text-sm leading-5 text-white/34">
+                      {nextLyric?.text ?? ""}
+                    </p>
+                  </div>
+                ) : (
+                  <p className="mt-3 min-h-[7.25rem] font-serif text-2xl font-light leading-snug text-white/42">
+                    {lyricEmptyCopy}
+                  </p>
+                )}
                 <p className="mt-4 font-mono text-[10px] uppercase tracking-label text-[#dd3f35]/80">
-                  {playing ? activeTrack.title : "waiting for music"}
+                  {currentLyric ? formatTime(currentLyric.time) : "waiting for music"}
                 </p>
               </div>
             </div>
@@ -254,7 +280,7 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
               >
                 <span
                   aria-hidden
-                  className={`absolute inset-[14%] rounded-full bg-[#dd3f35]/24 blur-3xl transition-opacity duration-700 ${recordGlow}`}
+                  className={`absolute inset-[16%] rounded-full bg-[#dd3f35]/18 blur-3xl transition-opacity duration-700 ${recordGlow}`}
                 />
                 <span
                   aria-hidden
@@ -264,7 +290,7 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
                   data-record-disc
                   className={`absolute inset-[9%] overflow-hidden rounded-full border border-white/10 bg-[radial-gradient(circle_at_center,#1b1718_0_18%,#080808_19%_100%)] shadow-[0_0_0_10px_rgba(255,255,255,0.03),0_22px_64px_-34px_rgba(0,0,0,1)] ${
                     playing
-                      ? "motion-safe:animate-[spin_11s_linear_infinite]"
+                      ? "motion-safe:animate-[spin_18s_linear_infinite]"
                       : ""
                   }`}
                 >
@@ -294,7 +320,7 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
                     aria-hidden
                     className={`absolute inset-0 rounded-full bg-[linear-gradient(115deg,transparent_0%,transparent_39%,rgba(255,255,255,0.22)_49%,transparent_59%,transparent_100%)] opacity-0 ${
                       playing
-                        ? "motion-safe:animate-[record-sheen_2.8s_ease-in-out_infinite]"
+                        ? "motion-safe:animate-[record-sheen_5.5s_ease-in-out_infinite]"
                         : ""
                     }`}
                   />
@@ -389,19 +415,16 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
               </div>
 
               <div className="flex items-center justify-between gap-4 md:justify-end">
-                <div className="flex h-8 w-28 shrink-0 items-end gap-1">
-                  {visualizerBars.slice(0, 8).map((height, index) => (
+                <div className="flex h-10 w-28 shrink-0 items-center justify-end gap-2">
+                  {signalDots.map((delay) => (
                     <span
-                      key={`${height}-${index}`}
-                      className={`w-full rounded-t-[3px] bg-[#dd3f35] ${
+                      key={delay}
+                      className={`h-2 w-2 rounded-full bg-[#dd3f35] ${
                         playing
-                          ? "opacity-80 motion-safe:animate-[equalizer_0.9s_ease-in-out_infinite]"
-                          : "opacity-24"
+                          ? "motion-safe:animate-[signal-dot_1.5s_ease-in-out_infinite]"
+                          : "opacity-25"
                       }`}
-                      style={{
-                        height: `${height}%`,
-                        animationDelay: `${index * 55}ms`,
-                      }}
+                      style={{ animationDelay: `${delay}ms` }}
                     />
                   ))}
                 </div>
@@ -427,17 +450,18 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
             </div>
 
             <div className="mt-5">
-              <button
-                type="button"
-                aria-label="跳转播放进度"
-                onClick={seekTo}
-                className="block h-1.5 w-full overflow-hidden rounded-full bg-white/10 text-left"
-              >
-                <span
-                  className="block h-full rounded-full bg-[linear-gradient(90deg,#dd3f35,#ff766d)] transition-[width] duration-150"
-                  style={{ width: `${progress}%` }}
-                />
-              </button>
+              <input
+                type="range"
+                aria-label="拖动播放进度"
+                min={0}
+                max={Math.max(duration, 1)}
+                step={0.1}
+                value={Math.min(currentTime, Math.max(duration, 0))}
+                onInput={(event) => seekTo(Number(event.currentTarget.value))}
+                onChange={(event) => seekTo(Number(event.currentTarget.value))}
+                className="night-range"
+                style={{ "--progress": `${progress}%` } as CSSProperties}
+              />
               <div className="mt-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-label text-white/35">
                 <span>{formatTime(currentTime)}</span>
                 <span>{formatTime(duration)}</span>
@@ -478,21 +502,18 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
             <p className="font-mono text-[10px] uppercase tracking-label text-white/40">
               signal
             </p>
-            <div className="mt-4 flex h-20 items-end gap-1.5">
-              {[32, 58, 44, 78, 52, 68, 38, 84, 46, 62, 36, 70].map(
-                (height, index) => (
-                  <span
-                    key={`${height}-${index}`}
-                    className={`w-full rounded-t-[3px] bg-[#dd3f35] ${
-                      playing ? "opacity-80 motion-safe:animate-pulse" : "opacity-35"
-                    }`}
-                    style={{
-                      height: `${height}%`,
-                      animationDelay: `${index * 70}ms`,
-                    }}
-                  />
-                ),
-              )}
+            <div className="mt-6 flex h-16 items-center justify-center gap-3">
+              {signalDots.map((delay) => (
+                <span
+                  key={delay}
+                  className={`h-2.5 w-2.5 rounded-full bg-[#dd3f35] ${
+                    playing
+                      ? "motion-safe:animate-[signal-dot_1.5s_ease-in-out_infinite]"
+                      : "opacity-28"
+                  }`}
+                  style={{ animationDelay: `${delay}ms` }}
+                />
+              ))}
             </div>
           </div>
 
