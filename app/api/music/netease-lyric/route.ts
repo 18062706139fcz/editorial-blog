@@ -9,11 +9,21 @@ type NeteaseLyricResponse = {
   lrc?: {
     lyric?: string;
   };
+  yrc?: {
+    lyric?: string;
+  };
+};
+
+type LyricWord = {
+  time: number;
+  duration: number;
+  text: string;
 };
 
 type LyricLine = {
   time: number;
   text: string;
+  words?: LyricWord[];
 };
 
 const creditPattern = /^(作词|作曲|编曲|制作人|出品|发行|OP|SP)\s*[:：]/i;
@@ -52,6 +62,50 @@ function parseLrc(lyric: string) {
   return lines.sort((a, b) => a.time - b.time);
 }
 
+function parseYrc(lyric: string) {
+  const lines: LyricLine[] = [];
+
+  for (const rawLine of lyric.split(/\r?\n/)) {
+    const lineMatch = rawLine.match(/^\[(\d+),(\d+)\](.*)$/);
+    if (!lineMatch) continue;
+
+    const lineStartMs = Number(lineMatch[1]);
+    const wordsRaw = lineMatch[3];
+    if (!Number.isFinite(lineStartMs) || !wordsRaw) continue;
+
+    const words: LyricWord[] = [];
+    const wordPattern = /\((\d+),(\d+),\d+\)([^()]*)/g;
+    let wordMatch = wordPattern.exec(wordsRaw);
+
+    while (wordMatch) {
+      const wordStartMs = Number(wordMatch[1]);
+      const wordDurationMs = Number(wordMatch[2]);
+      const text = wordMatch[3];
+
+      if (Number.isFinite(wordStartMs) && Number.isFinite(wordDurationMs) && text) {
+        words.push({
+          time: wordStartMs / 1000,
+          duration: wordDurationMs / 1000,
+          text,
+        });
+      }
+
+      wordMatch = wordPattern.exec(wordsRaw);
+    }
+
+    const text = words.map((word) => word.text).join("").trim();
+    if (!text || creditPattern.test(text) || words.length === 0) continue;
+
+    lines.push({
+      time: lineStartMs / 1000,
+      text,
+      words,
+    });
+  }
+
+  return lines.sort((a, b) => a.time - b.time);
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id") ?? "";
@@ -60,11 +114,16 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Track is not allowed." }, { status: 400 });
   }
 
-  const apiUrl = new URL("https://music.163.com/api/song/lyric");
+  const apiUrl = new URL("https://music.163.com/api/song/lyric/v1");
   apiUrl.searchParams.set("id", id);
-  apiUrl.searchParams.set("lv", "1");
-  apiUrl.searchParams.set("kv", "1");
-  apiUrl.searchParams.set("tv", "-1");
+  apiUrl.searchParams.set("cp", "false");
+  apiUrl.searchParams.set("tv", "0");
+  apiUrl.searchParams.set("lv", "0");
+  apiUrl.searchParams.set("rv", "0");
+  apiUrl.searchParams.set("kv", "0");
+  apiUrl.searchParams.set("yv", "0");
+  apiUrl.searchParams.set("ytv", "0");
+  apiUrl.searchParams.set("yrv", "0");
 
   const response = await fetch(apiUrl, {
     cache: "no-store",
@@ -83,8 +142,9 @@ export async function GET(request: Request) {
   }
 
   const payload = (await response.json()) as NeteaseLyricResponse;
-  const lyric = payload.lrc?.lyric ?? "";
-  const lines = parseLrc(lyric);
+  const yrcLines = parseYrc(payload.yrc?.lyric ?? "");
+  const lines = yrcLines.length > 0 ? yrcLines : parseLrc(payload.lrc?.lyric ?? "");
+  const source = yrcLines.length > 0 ? "yrc" : "lrc";
 
   if (payload.code !== 200 || lines.length === 0) {
     return NextResponse.json(
@@ -97,6 +157,7 @@ export async function GET(request: Request) {
     {
       id,
       lines,
+      source,
     },
     {
       headers: {

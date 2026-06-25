@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { HiddenRoom } from "@/lib/hidden-rooms";
 
 type NightStyle = CSSProperties & {
@@ -15,8 +15,8 @@ type RangeStyle = CSSProperties & {
   "--progress": string;
 };
 
-type LyricProgressStyle = CSSProperties & {
-  "--lyric-progress": string;
+type LyricRailStyle = CSSProperties & {
+  "--current-lyric-index": number;
 };
 
 type TrackSource = {
@@ -26,10 +26,31 @@ type TrackSource = {
   type: string | null;
 };
 
+type HotComment = {
+  content: string;
+  likedCount: number;
+  nickname: string;
+};
+
+type LyricWord = {
+  time: number;
+  duration: number;
+  text: string;
+};
+
 type LyricLine = {
   time: number;
   text: string;
+  words?: LyricWord[];
 };
+
+const specialLyricTerms = [
+  "含笑半步癫",
+  "桃木降妖剑",
+  "长生殿",
+  "尾生约",
+  "睡梦罗汉拳",
+];
 
 const tracks = [
   {
@@ -83,10 +104,6 @@ function formatTime(value: number) {
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }
 
-function clamp(value: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, value));
-}
-
 function selectLyricIndex(lines: LyricLine[], time: number) {
   if (lines.length === 0) return -1;
 
@@ -101,13 +118,13 @@ function LyricIdleDoodle({ copy }: { copy: string }) {
   return (
     <div
       data-lyric-idle
-      className="mt-3 min-h-[7.25rem] rounded-[8px] border border-white/8 bg-white/[0.025] px-4 py-3"
+      className="mt-3 min-h-[7.25rem] px-1 py-2"
     >
-      <div className="relative h-16 overflow-hidden rounded-[6px] border border-white/8 bg-[#0c0c0f] text-[var(--night-accent-tail)]">
+      <div className="relative h-16 overflow-hidden rounded-[6px] bg-[radial-gradient(circle_at_35%_45%,var(--night-accent-soft),transparent_58%)] text-[var(--night-accent-tail)]">
         <svg
           aria-hidden
           viewBox="0 0 220 72"
-          className="absolute inset-0 h-full w-full opacity-70"
+          className="absolute inset-0 h-full w-full opacity-60"
         >
           <path
             d="M19 45 C48 15 76 59 105 31 S160 24 198 51"
@@ -136,20 +153,144 @@ function LyricIdleDoodle({ copy }: { copy: string }) {
           月
         </span>
       </div>
-      <p className="mt-3 text-sm leading-6 text-white/48">{copy}</p>
+      <p className="mt-3 text-sm leading-6 text-white/46">{copy}</p>
+    </div>
+  );
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function renderLyricPieces(text: string) {
+  const specialPattern = new RegExp(
+    `(${specialLyricTerms.map(escapeRegExp).join("|")})`,
+    "g",
+  );
+
+  return text.split(/(【[^】]+】)/g).flatMap((part, index) => {
+    if (!part) return null;
+    if (/^【[^】]+】$/.test(part)) {
+      return (
+        <span
+          key={`${part}-${index}`}
+          className="lyric-token lyric-token--bracket"
+        >
+          {part.slice(1, -1)}
+        </span>
+      );
+    }
+    return part.split(specialPattern).map((segment, segmentIndex) => {
+      if (!segment) return null;
+      if (specialLyricTerms.includes(segment)) {
+        return (
+          <span
+            key={`${segment}-${index}-${segmentIndex}`}
+            className="lyric-token lyric-token--literary"
+          >
+            {segment}
+          </span>
+        );
+      }
+      return <span key={`${segment}-${index}-${segmentIndex}`}>{segment}</span>;
+    });
+  });
+}
+
+function TimedLyricLine({
+  currentTime,
+  line,
+}: {
+  currentTime: number;
+  line: LyricLine;
+}) {
+  if (!line.words?.length) {
+    return <span>{renderLyricPieces(line.text)}</span>;
+  }
+
+  return (
+    <span
+      aria-label={line.text}
+      className="karaoke-line karaoke-line--timed"
+    >
+      {line.words.map((word, index) => {
+        const wordStart = word.time;
+        const wordEnd = word.time + Math.max(0.05, word.duration);
+        const isSung = currentTime >= wordEnd;
+        const isActive = currentTime >= wordStart && currentTime < wordEnd;
+
+        return (
+          <span
+            aria-hidden
+            key={`${word.time}-${word.text}-${index}`}
+            className={`lyric-word ${isSung ? "is-sung" : ""} ${
+              isActive ? "is-active" : ""
+            }`}
+          >
+            {word.text}
+          </span>
+        );
+      })}
+    </span>
+  );
+}
+
+function LyricDisplay({
+  currentIndex,
+  currentTime,
+  lines,
+}: {
+  currentIndex: number;
+  currentTime: number;
+  lines: LyricLine[];
+}) {
+  return (
+    <div className="lyric-viewport mt-3 h-[12rem] overflow-hidden">
+      <div
+        className="lyric-rail"
+        style={
+          {
+            "--current-lyric-index": currentIndex,
+          } as LyricRailStyle
+        }
+      >
+        {lines.map((line, index) => {
+          const isCurrent = index === currentIndex;
+          const distance = Math.abs(index - currentIndex);
+          return (
+            <p
+              key={`${line.time}-${line.text}`}
+              className={`lyric-row ${
+                isCurrent ? "is-current" : distance <= 1 ? "is-near" : ""
+              }`}
+            >
+              {isCurrent ? (
+                <TimedLyricLine currentTime={currentTime} line={line} />
+              ) : (
+                <span>{renderLyricPieces(line.text)}</span>
+              )}
+            </p>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
 export default function NightRadio({ room }: { room: HiddenRoom }) {
+  const router = useRouter();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [lightsOut, setLightsOut] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [source, setSource] = useState<TrackSource | null>(null);
+  const [hotComment, setHotComment] = useState<HotComment | null>(null);
   const [lyrics, setLyrics] = useState<LyricLine[]>([]);
   const [loadingSource, setLoadingSource] = useState(true);
+  const [loadingComment, setLoadingComment] = useState(true);
   const [loadingLyrics, setLoadingLyrics] = useState(true);
   const [sourceError, setSourceError] = useState("");
+  const [commentError, setCommentError] = useState("");
   const [lyricError, setLyricError] = useState("");
   const [playbackError, setPlaybackError] = useState("");
   const [currentTime, setCurrentTime] = useState(0);
@@ -164,27 +305,19 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
   const currentLyricIndex =
     hasPlaybackPosition && lyrics.length > 0 ? selectLyricIndex(lyrics, currentTime) : -1;
   const currentLyric = currentLyricIndex >= 0 ? lyrics[currentLyricIndex] : null;
-  const previousLyric = currentLyricIndex > 0 ? lyrics[currentLyricIndex - 1] : null;
-  const nextLyric =
-    currentLyricIndex >= 0 && currentLyricIndex < lyrics.length - 1
-      ? lyrics[currentLyricIndex + 1]
-      : null;
-  const lyricLineEnd = currentLyric
-    ? (nextLyric?.time ?? Math.min(duration, currentLyric.time + 4.5))
-    : 0;
-  const currentLyricProgress = currentLyric
-    ? clamp(
-        (currentTime - currentLyric.time) /
-          Math.max(1.2, lyricLineEnd - currentLyric.time),
-        0,
-        1,
-      )
-    : 0;
   const lyricEmptyCopy = lyricError
     ? lyricError
     : loadingLyrics
       ? "正在向网易云取歌词。"
       : "先把灯留暗，等风从唱片里经过。";
+  const hotCommentCopy = commentError
+    ? "热评暂时没取到。"
+    : loadingComment
+      ? "正在拉取网易云热评。"
+      : hotComment?.content ?? "热评暂时没取到。";
+  const hotCommentMeta = hotComment
+    ? `${hotComment.nickname} / ${hotComment.likedCount} 赞`
+    : "NetEase hot comment";
   const nightStyle: NightStyle = {
     "--night-accent": activeTrack.accent,
     "--night-accent-soft": activeTrack.accentSoft,
@@ -198,11 +331,14 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
     setCurrentTime(0);
     setDuration(activeTrack.durationSeconds);
     setLoadingSource(true);
+    setLoadingComment(true);
     setLoadingLyrics(true);
     setSourceError("");
+    setCommentError("");
     setLyricError("");
     setPlaybackError("");
     setSource(null);
+    setHotComment(null);
     setLyrics([]);
     audioRef.current?.pause();
 
@@ -225,6 +361,26 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
       })
       .finally(() => {
         if (!cancelled) setLoadingSource(false);
+      });
+
+    fetch(`/api/music/netease-comments?id=${activeTrack.neteaseId}`)
+      .then(async (response) => {
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload.error ?? "热评暂时不可用。");
+        }
+        return payload as { comment: HotComment };
+      })
+      .then((payload) => {
+        if (cancelled) return;
+        setHotComment(payload.comment);
+      })
+      .catch((error: Error) => {
+        if (cancelled) return;
+        setCommentError(error.message);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingComment(false);
       });
 
     fetch(`/api/music/netease-lyric?id=${activeTrack.neteaseId}`)
@@ -282,6 +438,16 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
     setCurrentTime(clampedTime);
   }
 
+  function closeLamp() {
+    if (lightsOut) return;
+    audioRef.current?.pause();
+    setPlaying(false);
+    setLightsOut(true);
+    window.setTimeout(() => {
+      router.push("/");
+    }, 720);
+  }
+
   return (
     <div
       data-night-stage
@@ -290,7 +456,7 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(155,132,151,0.16),transparent_30%),linear-gradient(180deg,#09090b_0%,#050506_58%,#050506_100%)]" />
       <div className="relative mx-auto grid w-full max-w-[74rem] gap-8 px-6 py-10 sm:py-14 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-start">
-        <section className="rounded-[8px] border border-[#2a2528] bg-[#151214]/95 p-5 shadow-[0_30px_90px_-58px_rgba(0,0,0,0.95)] sm:p-7">
+        <section className="min-w-0 rounded-[8px] border border-[#2a2528] bg-[#151214]/95 p-5 shadow-[0_30px_90px_-58px_rgba(0,0,0,0.95)] sm:p-7">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-5 font-mono text-[10px] uppercase tracking-label text-white/45">
             <span>{room.eyebrow}</span>
             <span>{room.coordinate}</span>
@@ -312,7 +478,7 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
             }}
           />
 
-          <div className="mt-7 grid gap-8 lg:grid-cols-[19rem_minmax(0,1fr)] lg:items-center">
+          <div className="mt-7 grid min-w-0 gap-8 lg:grid-cols-[19rem_minmax(0,1fr)] lg:items-center">
             <div>
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-label text-[var(--night-accent-tail)]">
@@ -325,55 +491,9 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
                   {room.summary}
                 </p>
               </div>
-
-              <div
-                data-lyric-panel
-                className="mt-8 rounded-[8px] border border-white/10 bg-[#09090b]/72 p-4"
-              >
-                <p className="font-mono text-[10px] uppercase tracking-label text-white/35">
-                  netease lyric
-                </p>
-                {currentLyric ? (
-                  <div className="mt-3 min-h-[7.25rem]">
-                    <p
-                      key={`previous-${previousLyric?.time ?? "empty"}`}
-                      className="min-h-5 truncate text-sm leading-5 text-white/28 motion-safe:animate-[lyric-soft-enter_360ms_ease-out]"
-                    >
-                      {previousLyric?.text ?? ""}
-                    </p>
-                    <p
-                      key={`${currentLyric.time}-${currentLyric.text}`}
-                      className="mt-2 font-serif text-[1.65rem] font-light leading-snug motion-safe:animate-[lyric-rise_420ms_ease-out]"
-                    >
-                      <span
-                        aria-label={currentLyric.text}
-                        className="karaoke-line"
-                        style={
-                          {
-                            "--lyric-progress": `${currentLyricProgress * 100}%`,
-                          } as LyricProgressStyle
-                        }
-                      >
-                        {currentLyric.text}
-                      </span>
-                    </p>
-                    <p
-                      key={`next-${nextLyric?.time ?? "empty"}`}
-                      className="mt-3 min-h-5 truncate text-sm leading-5 text-white/34 motion-safe:animate-[lyric-soft-enter_360ms_ease-out]"
-                    >
-                      {nextLyric?.text ?? ""}
-                    </p>
-                  </div>
-                ) : (
-                  <LyricIdleDoodle copy={lyricEmptyCopy} />
-                )}
-                <p className="mt-4 font-mono text-[10px] uppercase tracking-label text-[var(--night-accent-tail)]">
-                  {currentLyric ? formatTime(currentLyric.time) : "waiting for music"}
-                </p>
-              </div>
             </div>
 
-            <div className="relative rounded-[8px] border border-white/10 bg-[linear-gradient(145deg,#1b1719_0%,#0b0b0d_100%)] px-5 py-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+            <div className="relative min-w-0 rounded-[8px] border border-white/10 bg-[linear-gradient(145deg,#1b1719_0%,#0b0b0d_100%)] px-5 py-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
               <div
                 data-turntable
                 className="relative mx-auto aspect-square w-full max-w-[31rem]"
@@ -482,10 +602,31 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
                 </svg>
               </div>
             </div>
+
+            <div
+              data-lyric-panel
+              className="min-w-0 rounded-[8px] border border-white/10 bg-[#09090b]/72 p-4 sm:p-5 lg:col-span-2"
+            >
+              <div className="flex items-center justify-between gap-4 font-mono text-[10px] uppercase tracking-label">
+                <p className="text-white/38">netease lyric</p>
+                <p className="text-[var(--night-accent-tail)]">
+                  {currentLyric ? formatTime(currentLyric.time) : "waiting for music"}
+                </p>
+              </div>
+              {currentLyric ? (
+                <LyricDisplay
+                  currentTime={currentTime}
+                  currentIndex={currentLyricIndex}
+                  lines={lyrics}
+                />
+              ) : (
+                <LyricIdleDoodle copy={lyricEmptyCopy} />
+              )}
+            </div>
           </div>
 
           <div className="mt-7 overflow-hidden rounded-[8px] border border-white/10 bg-[#09090b] p-4">
-            <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_12rem] md:items-center">
+            <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_18rem] md:items-center">
               <div className="flex min-w-0 items-center gap-4">
                 <div
                   aria-hidden
@@ -518,10 +659,13 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
               <div className="flex items-center justify-between gap-4 md:justify-end">
                 <div className="hidden min-w-0 text-right md:block">
                   <p className="font-mono text-[10px] uppercase tracking-label text-white/30">
-                    lrc sync
+                    热门评论
                   </p>
-                  <p className="mt-1 max-w-[11rem] truncate text-xs text-white/48">
-                    {currentLyric?.text ?? activeTrack.title}
+                  <p className="hot-comment-text mt-1 max-w-[14rem] text-xs leading-5 text-white/62">
+                    {hotCommentCopy}
+                  </p>
+                  <p className="mt-1 max-w-[14rem] truncate font-mono text-[9px] uppercase tracking-label text-white/45">
+                    {hotCommentMeta}
                   </p>
                 </div>
                 <button
@@ -602,14 +746,24 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
             </div>
           </div>
 
-          <Link
-            href="/"
+          <button
+            type="button"
+            onClick={closeLamp}
             className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-white/12 px-5 font-mono text-[10px] uppercase tracking-label text-white/55 transition-colors hover:border-white/35 hover:text-white"
           >
             关掉台灯
-          </Link>
+          </button>
         </aside>
       </div>
+      <div
+        aria-hidden
+        data-lights-out
+        className={`pointer-events-none fixed inset-0 z-50 bg-[#050506] ${
+          lightsOut
+            ? "motion-safe:animate-[lights-out_720ms_cubic-bezier(0.22,1,0.36,1)_forwards]"
+            : "opacity-0"
+        }`}
+      />
     </div>
   );
 }

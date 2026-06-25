@@ -120,19 +120,136 @@
   }
 
   .karaoke-line {
-    --lyric-progress: 0%;
-    display: inline;
-    color: transparent;
-    background: linear-gradient(
-      90deg,
-      #f7f0e8 0%,
-      var(--night-accent-tail) var(--lyric-progress),
-      rgba(247, 240, 232, 0.42) var(--lyric-progress),
-      rgba(247, 240, 232, 0.42) 100%
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+    white-space: normal;
+    color: rgba(247, 240, 232, 0.42);
+    vertical-align: top;
+  }
+
+  .karaoke-line--timed {
+    color: rgba(247, 240, 232, 0.34);
+  }
+
+  .lyric-word {
+    color: rgba(247, 240, 232, 0.32);
+    transition:
+      color 180ms ease,
+      opacity 180ms ease,
+      text-shadow 180ms ease;
+  }
+
+  .lyric-word.is-sung {
+    color: var(--night-accent-tail);
+  }
+
+  .lyric-word.is-active {
+    color: #f7f0e8;
+    text-shadow: 0 0 20px var(--night-accent-soft);
+  }
+
+  .lyric-token {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    margin: 0 0.1em;
+    padding: 0 0.24rem 0.04rem;
+    border-radius: 0.28rem;
+    background: color-mix(in srgb, var(--night-accent) 14%, transparent);
+    color: var(--night-accent-tail);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 0.72em;
+    letter-spacing: 0.08em;
+    line-height: 1.32;
+    text-shadow: 0 0 18px var(--night-accent-soft);
+    transform: translateY(-0.04em);
+  }
+
+  .lyric-token::after {
+    position: absolute;
+    right: 0.2rem;
+    bottom: 0.08rem;
+    left: 0.2rem;
+    height: 1px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, var(--night-accent-tail), transparent);
+    content: "";
+    opacity: 0.52;
+  }
+
+  .lyric-token--literary {
+    padding-left: 0.35rem;
+    background:
+      radial-gradient(circle at 0.18rem 50%, var(--night-accent-tail) 0 0.08rem, transparent 0.09rem),
+      color-mix(in srgb, var(--night-accent) 12%, transparent);
+    font-family: Georgia, "Times New Roman", "Songti SC", "SimSun", serif;
+    font-size: 0.86em;
+    letter-spacing: 0.04em;
+  }
+
+  .lyric-viewport {
+    --lyric-row-height: 4rem;
+    height: calc(var(--lyric-row-height) * 3);
+    max-height: calc(var(--lyric-row-height) * 3);
+    contain: paint;
+  }
+
+  .lyric-rail {
+    transform: translateY(
+      calc(var(--lyric-row-height) - (var(--current-lyric-index) * var(--lyric-row-height)))
     );
-    -webkit-background-clip: text;
-    background-clip: text;
-    text-shadow: 0 0 28px var(--night-accent-soft);
+    transition: transform 680ms cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+  }
+
+  .lyric-row {
+    display: grid;
+    height: var(--lyric-row-height);
+    align-items: center;
+    overflow: visible;
+    color: rgba(247, 240, 232, 0.25);
+    font-family: Georgia, "Times New Roman", "Songti SC", "SimSun", serif;
+    font-size: 1.22rem;
+    line-height: 1.45;
+    opacity: 0.14;
+    white-space: normal;
+    transform: translate3d(0, 0.18rem, 0) scale(0.98);
+    transition:
+      opacity 520ms ease,
+      color 520ms ease,
+      filter 520ms ease,
+      transform 680ms cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform, opacity;
+  }
+
+  .lyric-row.is-near {
+    opacity: 0.42;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  .lyric-row.is-current {
+    color: rgba(247, 240, 232, 0.42);
+    font-weight: 300;
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  .lyric-row > span {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    overflow: visible;
+    white-space: normal;
+  }
+
+  .hot-comment-text {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
   }
 }
 
@@ -151,27 +268,17 @@
   }
 }
 
-@keyframes lyric-rise {
+@keyframes lights-out {
   0% {
     opacity: 0;
-    transform: translateY(0.45rem);
-    filter: blur(4px);
+    clip-path: circle(0% at 50% 44%);
+  }
+  42% {
+    opacity: 0.72;
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
-  }
-}
-
-@keyframes lyric-soft-enter {
-  0% {
-    opacity: 0;
-    transform: translateY(0.25rem);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
+    clip-path: circle(150% at 50% 44%);
   }
 }
 

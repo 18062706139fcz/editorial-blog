@@ -87,6 +87,7 @@ test("night radio uses real Chen Li music embeds instead of synthetic noise", ()
 
   assert.match(nightRadio, /\/api\/music\/netease-url/);
   assert.match(nightRadio, /\/api\/music\/netease-lyric/);
+  assert.match(nightRadio, /\/api\/music\/netease-comments/);
   assert.match(nightRadio, /29357047/);
   assert.match(nightRadio, /30431370/);
   assert.match(nightRadio, /2749429518/);
@@ -108,19 +109,33 @@ test("night radio record and play control have motion-oriented styling", () => {
   assert.match(nightRadio, /data-lyric-panel/);
   assert.match(nightRadio, /data-lyric-idle/);
   assert.match(nightRadio, /currentLyric/);
-  assert.match(nightRadio, /currentLyricProgress/);
+  assert.match(nightRadio, /TimedLyricLine/);
   assert.match(nightRadio, /karaoke-line/);
+  assert.match(nightRadio, /lyric-word/);
+  assert.match(nightRadio, /lyric-rail/);
+  assert.match(nightRadio, /lyric-row/);
+  assert.match(nightRadio, /lyric-viewport mt-3 h-\[12rem\] overflow-hidden/);
+  assert.match(nightRadio, /lyric-token/);
+  assert.match(nightRadio, /specialLyricTerms/);
+  assert.match(nightRadio, /长生殿/);
+  assert.match(nightRadio, /lyric-token--literary/);
   assert.match(nightRadio, /max-w-\[31rem\]/);
   assert.match(nightRadio, /motion-safe:animate-\[spin_18s_linear_infinite\]/);
   assert.match(nightRadio, /animationPlayState/);
   assert.match(nightRadio, /motion-safe:animate-\[record-sheen/);
-  assert.match(nightRadio, /motion-safe:animate-\[lyric-rise/);
+  assert.match(nightRadio, /热门评论/);
+  assert.match(nightRadio, /data-lights-out/);
   assert.equal(nightRadio.includes("lg:-mr-24"), false);
   assert.equal(nightRadio.includes("absolute left-1/2 top-1/2 h-3 w-3"), false);
   assert.equal(nightRadio.includes("rounded-full bg-[#dd3f35] px-5"), false);
   assert.equal(nightRadio.includes("signal-dot"), false);
+  assert.equal(nightRadio.includes("lrc sync"), false);
+  assert.equal(nightRadio.includes("border border-white/8 bg-white/[0.025]"), false);
   assert.equal(nightRadio.includes("按下播放，歌词会跟着时间浮上来。"), false);
+  assert.equal(nightRadio.includes("遇见很多奇迹"), false);
   assert.equal(nightRadio.includes("min-w-28"), false);
+  assert.equal(nightRadio.includes("currentLyricProgress"), false);
+  assert.equal(nightRadio.includes("karaoke-line__fill"), false);
   assert.match(nightRadio, /aria-label=\{playing \? "暂停夜间音乐台" : "播放夜间音乐台"\}/);
 });
 
@@ -144,12 +159,21 @@ test("night radio uses quieter palette variables and no decorative signal panel"
   assert.match(nightRadio, /accentSoft/);
   assert.match(globals, /var\(--night-accent\)/);
   assert.match(globals, /night-range:focus/);
-  assert.match(globals, /lyric-rise/);
-  assert.match(globals, /lyric-soft-enter/);
+  assert.match(globals, /lyric-rail/);
+  assert.match(globals, /--lyric-row-height:\s*4rem/);
+  assert.match(globals, /height:\s*calc\(var\(--lyric-row-height\) \* 3\)/);
+  assert.match(globals, /white-space:\s*normal/);
+  assert.match(globals, /lyric-token/);
+  assert.match(globals, /lyric-token--literary/);
+  assert.match(globals, /lyric-word/);
+  assert.match(globals, /is-active/);
+  assert.match(globals, /hot-comment-text/);
+  assert.match(globals, /lights-out/);
   assert.match(globals, /karaoke-line/);
   assert.equal(nightRadio.includes("#dd3f35"), false);
   assert.equal(globals.includes("#dd3f35"), false);
   assert.equal(nightRadio.includes("signal"), false);
+  assert.equal(globals.includes("karaoke-line__fill"), false);
 });
 
 test("netease music url API only proxies the approved Chen Li tracks", () => {
@@ -170,9 +194,25 @@ test("netease lyric API parses timed lyrics for the approved Chen Li tracks", ()
   assert.match(route, /30431370/);
   assert.match(route, /2749429518/);
   assert.match(route, /allowedTracks/);
-  assert.match(route, /music\.163\.com\/api\/song\/lyric/);
+  assert.match(route, /music\.163\.com\/api\/song\/lyric\/v1/);
   assert.match(route, /parseLrc/);
+  assert.match(route, /parseYrc/);
+  assert.match(route, /yrc/);
+  assert.match(route, /words/);
+  assert.match(route, /source/);
   assert.match(route, /creditPattern/);
+});
+
+test("netease comments API returns hot comments for approved Chen Li tracks", () => {
+  const route = source("../app/api/music/netease-comments/route.ts");
+
+  assert.match(route, /29357047/);
+  assert.match(route, /30431370/);
+  assert.match(route, /2749429518/);
+  assert.match(route, /allowedTracks/);
+  assert.match(route, /music\.163\.com\/api\/v1\/resource\/comments/);
+  assert.match(route, /hotComments/);
+  assert.match(route, /normalizeComment/);
 });
 
 test("night route opts the global chrome into a dark surface", () => {
