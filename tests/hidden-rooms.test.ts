@@ -77,7 +77,7 @@ test("night radio uses a full-bleed dark stage with Chen Li tracks", () => {
   assert.match(nightRadio, /artist:\s*"陈粒"/);
   assert.match(nightRadio, /当前曲目：/);
   assert.match(config, /夜里只开一盏小灯/);
-  assert.match(config, /沙漠边听风/);
+  assert.match(config, /沙、月亮和火光/);
   assert.equal(nightRadio.includes("世界正中"), false);
   assert.equal(config.includes("不是 dark mode"), false);
 });
@@ -106,14 +106,20 @@ test("night radio record and play control have motion-oriented styling", () => {
   assert.match(nightRadio, /data-turntable/);
   assert.match(nightRadio, /data-tonearm/);
   assert.match(nightRadio, /data-lyric-panel/);
+  assert.match(nightRadio, /data-lyric-idle/);
   assert.match(nightRadio, /currentLyric/);
+  assert.match(nightRadio, /currentLyricProgress/);
+  assert.match(nightRadio, /karaoke-line/);
   assert.match(nightRadio, /max-w-\[31rem\]/);
   assert.match(nightRadio, /motion-safe:animate-\[spin_18s_linear_infinite\]/);
+  assert.match(nightRadio, /animationPlayState/);
   assert.match(nightRadio, /motion-safe:animate-\[record-sheen/);
-  assert.match(nightRadio, /motion-safe:animate-\[signal-dot/);
+  assert.match(nightRadio, /motion-safe:animate-\[lyric-rise/);
   assert.equal(nightRadio.includes("lg:-mr-24"), false);
   assert.equal(nightRadio.includes("absolute left-1/2 top-1/2 h-3 w-3"), false);
   assert.equal(nightRadio.includes("rounded-full bg-[#dd3f35] px-5"), false);
+  assert.equal(nightRadio.includes("signal-dot"), false);
+  assert.equal(nightRadio.includes("按下播放，歌词会跟着时间浮上来。"), false);
   assert.equal(nightRadio.includes("min-w-28"), false);
   assert.match(nightRadio, /aria-label=\{playing \? "暂停夜间音乐台" : "播放夜间音乐台"\}/);
 });
@@ -128,6 +134,22 @@ test("night radio progress is driven by the real audio element", () => {
   assert.match(nightRadio, /type="range"/);
   assert.match(nightRadio, /aria-label="拖动播放进度"/);
   assert.match(nightRadio, /audioRef\.current\.play/);
+});
+
+test("night radio uses quieter palette variables and no decorative signal panel", () => {
+  const nightRadio = source("../components/NightRadio.tsx");
+  const globals = source("../app/globals.css");
+
+  assert.match(nightRadio, /--night-accent/);
+  assert.match(nightRadio, /accentSoft/);
+  assert.match(globals, /var\(--night-accent\)/);
+  assert.match(globals, /night-range:focus/);
+  assert.match(globals, /lyric-rise/);
+  assert.match(globals, /lyric-soft-enter/);
+  assert.match(globals, /karaoke-line/);
+  assert.equal(nightRadio.includes("#dd3f35"), false);
+  assert.equal(globals.includes("#dd3f35"), false);
+  assert.equal(nightRadio.includes("signal"), false);
 });
 
 test("netease music url API only proxies the approved Chen Li tracks", () => {

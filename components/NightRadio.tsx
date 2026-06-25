@@ -5,6 +5,20 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 import type { HiddenRoom } from "@/lib/hidden-rooms";
 
+type NightStyle = CSSProperties & {
+  "--night-accent": string;
+  "--night-accent-soft": string;
+  "--night-accent-tail": string;
+};
+
+type RangeStyle = CSSProperties & {
+  "--progress": string;
+};
+
+type LyricProgressStyle = CSSProperties & {
+  "--lyric-progress": string;
+};
+
 type TrackSource = {
   url: string;
   fee: number;
@@ -27,7 +41,9 @@ const tracks = [
     neteaseId: "29357047",
     coverUrl:
       "https://p2.music.126.net/VuJFMbXzpAProbJPoXLv7g==/7721870161993398.jpg",
-    accent: "#d9473f",
+    accent: "#bba6ba",
+    accentSoft: "rgba(187, 166, 186, 0.16)",
+    accentTail: "#dfccd8",
     note: "网易云可免费播放的陈粒曲目，走真实音频源。",
   },
   {
@@ -39,7 +55,9 @@ const tracks = [
     neteaseId: "30431370",
     coverUrl:
       "https://p2.music.126.net/VuJFMbXzpAProbJPoXLv7g==/7721870161993398.jpg",
-    accent: "#c8501e",
+    accent: "#c7a487",
+    accentSoft: "rgba(199, 164, 135, 0.16)",
+    accentTail: "#e0c4a8",
     note: "来自《如也》的《正趣果上果》，用当前可用音频 URL 播放。",
   },
   {
@@ -51,18 +69,22 @@ const tracks = [
     neteaseId: "2749429518",
     coverUrl:
       "https://p1.music.126.net/jeWHIkiTkBglJKxte7p6JA==/109951172059186762.jpg",
-    accent: "#dd3f35",
+    accent: "#9fb1b8",
+    accentSoft: "rgba(159, 177, 184, 0.16)",
+    accentTail: "#c6d2d6",
     note: "使用《十年自选》里的可播放版本。",
   },
 ];
-
-const signalDots = [0, 90, 180, 270, 360, 450, 540, 630];
 
 function formatTime(value: number) {
   if (!Number.isFinite(value) || value <= 0) return "0:00";
   const minutes = Math.floor(value / 60);
   const seconds = Math.floor(value % 60);
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(max, Math.max(min, value));
 }
 
 function selectLyricIndex(lines: LyricLine[], time: number) {
@@ -73,6 +95,50 @@ function selectLyricIndex(lines: LyricLine[], time: number) {
     if (time + 0.2 >= lines[index].time) selected = index;
   }
   return selected;
+}
+
+function LyricIdleDoodle({ copy }: { copy: string }) {
+  return (
+    <div
+      data-lyric-idle
+      className="mt-3 min-h-[7.25rem] rounded-[8px] border border-white/8 bg-white/[0.025] px-4 py-3"
+    >
+      <div className="relative h-16 overflow-hidden rounded-[6px] border border-white/8 bg-[#0c0c0f] text-[var(--night-accent-tail)]">
+        <svg
+          aria-hidden
+          viewBox="0 0 220 72"
+          className="absolute inset-0 h-full w-full opacity-70"
+        >
+          <path
+            d="M19 45 C48 15 76 59 105 31 S160 24 198 51"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeWidth="1.2"
+            strokeDasharray="4 8"
+          />
+          <circle cx="183" cy="23" r="10" fill="none" stroke="currentColor" />
+          <path
+            d="M65 51 L82 19 L94 49 M77 36 H90"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeWidth="1.4"
+          />
+        </svg>
+        <span className="absolute left-5 top-4 font-serif text-2xl text-white/62">
+          沙
+        </span>
+        <span className="absolute left-[48%] top-7 font-mono text-[10px] uppercase tracking-label text-white/32">
+          wind / lamp / echo
+        </span>
+        <span className="absolute bottom-3 right-6 font-serif text-xl text-white/52">
+          月
+        </span>
+      </div>
+      <p className="mt-3 text-sm leading-6 text-white/48">{copy}</p>
+    </div>
+  );
 }
 
 export default function NightRadio({ room }: { room: HiddenRoom }) {
@@ -103,11 +169,27 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
     currentLyricIndex >= 0 && currentLyricIndex < lyrics.length - 1
       ? lyrics[currentLyricIndex + 1]
       : null;
+  const lyricLineEnd = currentLyric
+    ? (nextLyric?.time ?? Math.min(duration, currentLyric.time + 4.5))
+    : 0;
+  const currentLyricProgress = currentLyric
+    ? clamp(
+        (currentTime - currentLyric.time) /
+          Math.max(1.2, lyricLineEnd - currentLyric.time),
+        0,
+        1,
+      )
+    : 0;
   const lyricEmptyCopy = lyricError
     ? lyricError
     : loadingLyrics
-      ? "歌词加载中。"
-      : "按下播放，歌词会跟着时间浮上来。";
+      ? "正在向网易云取歌词。"
+      : "先把灯留暗，等风从唱片里经过。";
+  const nightStyle: NightStyle = {
+    "--night-accent": activeTrack.accent,
+    "--night-accent-soft": activeTrack.accentSoft,
+    "--night-accent-tail": activeTrack.accentTail,
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -203,9 +285,10 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
   return (
     <div
       data-night-stage
+      style={nightStyle}
       className="relative left-1/2 min-h-[calc(100svh-4rem)] w-screen -translate-x-1/2 overflow-hidden bg-[#050506] text-[#f7f0e8]"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(221,63,53,0.14),transparent_30%),linear-gradient(180deg,#09090b_0%,#050506_58%,#050506_100%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(155,132,151,0.16),transparent_30%),linear-gradient(180deg,#09090b_0%,#050506_58%,#050506_100%)]" />
       <div className="relative mx-auto grid w-full max-w-[74rem] gap-8 px-6 py-10 sm:py-14 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-start">
         <section className="rounded-[8px] border border-[#2a2528] bg-[#151214]/95 p-5 shadow-[0_30px_90px_-58px_rgba(0,0,0,0.95)] sm:p-7">
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-5 font-mono text-[10px] uppercase tracking-label text-white/45">
@@ -232,7 +315,7 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
           <div className="mt-7 grid gap-8 lg:grid-cols-[19rem_minmax(0,1fr)] lg:items-center">
             <div>
               <div>
-                <p className="font-mono text-[10px] uppercase tracking-label text-[#dd3f35]">
+                <p className="font-mono text-[10px] uppercase tracking-label text-[var(--night-accent-tail)]">
                   now playing
                 </p>
                 <h1 className="mt-4 whitespace-nowrap font-serif text-5xl font-light leading-none tracking-normal sm:text-6xl">
@@ -252,22 +335,39 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
                 </p>
                 {currentLyric ? (
                   <div className="mt-3 min-h-[7.25rem]">
-                    <p className="min-h-5 truncate text-sm leading-5 text-white/28">
+                    <p
+                      key={`previous-${previousLyric?.time ?? "empty"}`}
+                      className="min-h-5 truncate text-sm leading-5 text-white/28 motion-safe:animate-[lyric-soft-enter_360ms_ease-out]"
+                    >
                       {previousLyric?.text ?? ""}
                     </p>
-                    <p className="mt-2 font-serif text-[1.65rem] font-light leading-snug text-[#f7f0e8]">
-                      {currentLyric.text}
+                    <p
+                      key={`${currentLyric.time}-${currentLyric.text}`}
+                      className="mt-2 font-serif text-[1.65rem] font-light leading-snug motion-safe:animate-[lyric-rise_420ms_ease-out]"
+                    >
+                      <span
+                        aria-label={currentLyric.text}
+                        className="karaoke-line"
+                        style={
+                          {
+                            "--lyric-progress": `${currentLyricProgress * 100}%`,
+                          } as LyricProgressStyle
+                        }
+                      >
+                        {currentLyric.text}
+                      </span>
                     </p>
-                    <p className="mt-3 min-h-5 truncate text-sm leading-5 text-white/34">
+                    <p
+                      key={`next-${nextLyric?.time ?? "empty"}`}
+                      className="mt-3 min-h-5 truncate text-sm leading-5 text-white/34 motion-safe:animate-[lyric-soft-enter_360ms_ease-out]"
+                    >
                       {nextLyric?.text ?? ""}
                     </p>
                   </div>
                 ) : (
-                  <p className="mt-3 min-h-[7.25rem] font-serif text-2xl font-light leading-snug text-white/42">
-                    {lyricEmptyCopy}
-                  </p>
+                  <LyricIdleDoodle copy={lyricEmptyCopy} />
                 )}
-                <p className="mt-4 font-mono text-[10px] uppercase tracking-label text-[#dd3f35]/80">
+                <p className="mt-4 font-mono text-[10px] uppercase tracking-label text-[var(--night-accent-tail)]">
                   {currentLyric ? formatTime(currentLyric.time) : "waiting for music"}
                 </p>
               </div>
@@ -280,19 +380,20 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
               >
                 <span
                   aria-hidden
-                  className={`absolute inset-[16%] rounded-full bg-[#dd3f35]/18 blur-3xl transition-opacity duration-700 ${recordGlow}`}
+                  className={`absolute inset-[16%] rounded-full bg-[var(--night-accent-soft)] blur-3xl transition-opacity duration-700 ${recordGlow}`}
                 />
                 <span
                   aria-hidden
-                  className="absolute inset-[5%] rounded-full border border-white/8 bg-[#292b2f] shadow-[inset_0_0_36px_rgba(255,255,255,0.05),0_28px_80px_-48px_rgba(221,63,53,0.9)]"
+                  className="absolute inset-[5%] rounded-full border border-white/8 bg-[#292b2f] shadow-[inset_0_0_36px_rgba(255,255,255,0.05),0_28px_80px_-48px_var(--night-accent-soft)]"
                 />
                 <div
                   data-record-disc
                   className={`absolute inset-[9%] overflow-hidden rounded-full border border-white/10 bg-[radial-gradient(circle_at_center,#1b1718_0_18%,#080808_19%_100%)] shadow-[0_0_0_10px_rgba(255,255,255,0.03),0_22px_64px_-34px_rgba(0,0,0,1)] ${
-                    playing
+                    hasPlaybackPosition
                       ? "motion-safe:animate-[spin_18s_linear_infinite]"
                       : ""
                   }`}
+                  style={{ animationPlayState: playing ? "running" : "paused" }}
                 >
                   <span
                     aria-hidden
@@ -313,7 +414,7 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
                   <span
                     aria-hidden
                     className={`absolute inset-0 rounded-full bg-[conic-gradient(from_20deg,transparent_0deg,rgba(255,255,255,0.13)_20deg,transparent_45deg,transparent_184deg,rgba(255,255,255,0.06)_214deg,transparent_242deg,transparent_360deg)] transition-opacity duration-500 ${
-                      playing ? "opacity-80" : "opacity-25"
+                      hasPlaybackPosition ? "opacity-80" : "opacity-25"
                     }`}
                   />
                   <span
@@ -415,18 +516,13 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
               </div>
 
               <div className="flex items-center justify-between gap-4 md:justify-end">
-                <div className="flex h-10 w-28 shrink-0 items-center justify-end gap-2">
-                  {signalDots.map((delay) => (
-                    <span
-                      key={delay}
-                      className={`h-2 w-2 rounded-full bg-[#dd3f35] ${
-                        playing
-                          ? "motion-safe:animate-[signal-dot_1.5s_ease-in-out_infinite]"
-                          : "opacity-25"
-                      }`}
-                      style={{ animationDelay: `${delay}ms` }}
-                    />
-                  ))}
+                <div className="hidden min-w-0 text-right md:block">
+                  <p className="font-mono text-[10px] uppercase tracking-label text-white/30">
+                    lrc sync
+                  </p>
+                  <p className="mt-1 max-w-[11rem] truncate text-xs text-white/48">
+                    {currentLyric?.text ?? activeTrack.title}
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -435,7 +531,7 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
                   onClick={togglePlayback}
                   className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-white/14 bg-[#f7f0e8] text-[#151214] shadow-[0_16px_36px_-22px_rgba(0,0,0,1)] transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/30"
                 >
-                  <span className="grid h-7 w-7 place-items-center rounded-full bg-[#dd3f35] text-white">
+                  <span className="grid h-7 w-7 place-items-center rounded-full bg-[var(--night-accent)] text-[#101011]">
                     {playing ? (
                       <span className="flex gap-0.5">
                         <span className="h-3 w-1 rounded-full bg-current" />
@@ -460,7 +556,7 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
                 onInput={(event) => seekTo(Number(event.currentTarget.value))}
                 onChange={(event) => seekTo(Number(event.currentTarget.value))}
                 className="night-range"
-                style={{ "--progress": `${progress}%` } as CSSProperties}
+                style={{ "--progress": `${progress}%` } as RangeStyle}
               />
               <div className="mt-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-label text-white/35">
                 <span>{formatTime(currentTime)}</span>
@@ -472,7 +568,7 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
 
         <aside className="grid gap-4">
           <div className="rounded-[8px] border border-[#2a2528] bg-[#151214] p-5">
-            <p className="font-mono text-[10px] uppercase tracking-label text-[#dd3f35]">
+            <p className="font-mono text-[10px] uppercase tracking-label text-[var(--night-accent-tail)]">
               playlist
             </p>
             <div className="mt-4 grid gap-2">
@@ -483,9 +579,17 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
                   onClick={() => selectTrack(index)}
                   className={`rounded-[8px] border px-4 py-3 text-left transition-colors ${
                     index === activeIndex
-                      ? "border-[#dd3f35] bg-[#dd3f35]/12"
+                      ? "bg-white/[0.045]"
                       : "border-white/10 bg-white/[0.03] hover:border-white/25"
                   }`}
+                  style={
+                    index === activeIndex
+                      ? {
+                          borderColor: track.accent,
+                          boxShadow: `inset 0 0 0 1px ${track.accentSoft}`,
+                        }
+                      : undefined
+                  }
                 >
                   <span className="font-mono text-[10px] uppercase tracking-label text-white/35">
                     {String(index + 1).padStart(2, "0")} / {track.bpm}
@@ -498,28 +602,9 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
             </div>
           </div>
 
-          <div className="rounded-[8px] border border-[#2a2528] bg-[#151214] p-5">
-            <p className="font-mono text-[10px] uppercase tracking-label text-white/40">
-              signal
-            </p>
-            <div className="mt-6 flex h-16 items-center justify-center gap-3">
-              {signalDots.map((delay) => (
-                <span
-                  key={delay}
-                  className={`h-2.5 w-2.5 rounded-full bg-[#dd3f35] ${
-                    playing
-                      ? "motion-safe:animate-[signal-dot_1.5s_ease-in-out_infinite]"
-                      : "opacity-28"
-                  }`}
-                  style={{ animationDelay: `${delay}ms` }}
-                />
-              ))}
-            </div>
-          </div>
-
           <Link
             href="/"
-            className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-white/12 px-5 font-mono text-[10px] uppercase tracking-label text-white/55 transition-colors hover:border-[#dd3f35] hover:text-white"
+            className="inline-flex min-h-11 items-center justify-center rounded-[8px] border border-white/12 px-5 font-mono text-[10px] uppercase tracking-label text-white/55 transition-colors hover:border-white/35 hover:text-white"
           >
             关掉台灯
           </Link>
