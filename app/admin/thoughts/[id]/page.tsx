@@ -1,21 +1,21 @@
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { isAuthenticated } from "@/lib/auth";
-import PostEditor from "@/components/PostEditor";
+import ThoughtEditor from "@/components/ThoughtEditor";
 
 export const dynamic = "force-dynamic";
 
-export default async function EditPostPage({
+export default async function EditThoughtPage({
   params,
 }: {
   params: { id: string };
 }) {
   if (!isAuthenticated()) redirect("/admin/login");
 
-  const post = await prisma.post.findUnique({
+  const thought = await prisma.thought.findUnique({
     where: { id: Number(params.id) },
   });
-  if (!post) notFound();
+  if (!thought) notFound();
 
   return (
     <div className="py-10 sm:py-16">
@@ -23,9 +23,9 @@ export default async function EditPostPage({
         后台
       </p>
       <h1 className="mb-9 font-serif text-[2rem] text-ink sm:mb-12 sm:text-4xl">
-        编辑文章
+        编辑短札
       </h1>
-      <PostEditor post={post} />
+      <ThoughtEditor thought={thought} />
     </div>
   );
 }

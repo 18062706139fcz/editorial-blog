@@ -4,26 +4,28 @@ import { useState } from "react";
 import type { Post } from "@prisma/client";
 import ArchiveList from "@/components/ArchiveList";
 
-const CATEGORIES = ["All", "Prompting", "Essays", "News"];
+const CATEGORIES = ["全部", "提示词", "随笔", "现场"];
 
 export default function Archive({
   posts,
-  initialCategory = "All",
+  initialCategory = "全部",
 }: {
   posts: Post[];
   initialCategory?: string;
 }) {
-  const [active, setActive] = useState(initialCategory);
+  const [active, setActive] = useState(
+    CATEGORIES.includes(initialCategory) ? initialCategory : "全部",
+  );
 
   const filtered =
-    active === "All" ? posts : posts.filter((p) => p.category === active);
+    active === "全部" ? posts : posts.filter((p) => p.category === active);
 
   return (
     <>
       <div className="mb-9 flex flex-col gap-5 sm:mb-12 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
         <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
           <h2 className="font-serif text-[1.75rem] tracking-tight text-ink sm:text-3xl">
-            The archive
+            全部文章
           </h2>
           <span className="font-mono text-[11px] uppercase tracking-label text-ink-soft">
             / 归档
@@ -52,7 +54,7 @@ export default function Archive({
 
       {filtered.length === 0 ? (
         <p className="py-16 text-center font-serif text-2xl italic text-ink-soft">
-          No articles in this category yet.
+          这个分类还没有文章。
         </p>
       ) : (
         <ArchiveList posts={filtered} />

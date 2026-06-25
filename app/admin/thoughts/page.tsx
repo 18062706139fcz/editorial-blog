@@ -2,15 +2,15 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { isAuthenticated } from "@/lib/auth";
-import AdminPostList from "@/components/AdminPostList";
+import AdminThoughtList from "@/components/AdminThoughtList";
 import LogoutButton from "@/components/LogoutButton";
 
 export const dynamic = "force-dynamic";
 
-export default async function AdminDashboard() {
+export default async function AdminThoughtsPage() {
   if (!isAuthenticated()) redirect("/admin/login");
 
-  const posts = await prisma.post.findMany({
+  const thoughts = await prisma.thought.findMany({
     orderBy: { createdAt: "desc" },
   });
 
@@ -22,27 +22,27 @@ export default async function AdminDashboard() {
             后台
           </p>
           <h1 className="font-serif text-[2rem] text-ink sm:text-4xl">
-            文章
+            短札
           </h1>
           <nav className="mt-4 flex flex-wrap gap-4 font-mono text-[10px] uppercase tracking-label sm:text-[11px]">
-            <span className="text-ink">文章</span>
-            <Link href="/admin/thoughts" className="text-ink-soft hover:text-ink">
-              短札
+            <Link href="/admin" className="text-ink-soft hover:text-ink">
+              文章
             </Link>
+            <span className="text-ink">短札</span>
           </nav>
         </div>
         <div className="flex flex-wrap items-center gap-4 sm:gap-6">
           <Link
-            href="/admin/posts/new"
+            href="/admin/thoughts/new"
             className="border border-ink px-4 py-2.5 font-mono text-[10px] uppercase tracking-label text-ink transition-colors hover:bg-ink hover:text-paper sm:px-5 sm:text-[11px]"
           >
-            新文章
+            新短札
           </Link>
           <LogoutButton />
         </div>
       </div>
 
-      <AdminPostList posts={posts} />
+      <AdminThoughtList thoughts={thoughts} />
     </div>
   );
 }

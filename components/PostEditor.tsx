@@ -20,8 +20,8 @@ export default function PostEditor({ post }: { post?: Post }) {
   const [form, setForm] = useState({
     title: post?.title ?? "",
     slug: post?.slug ?? "",
-    category: post?.category ?? "Essays",
-    author: post?.author ?? "The Margin",
+    category: post?.category ?? "随笔",
+    author: post?.author ?? "Ryker",
     coverImage: post?.coverImage ?? "",
     excerpt: post?.excerpt ?? "",
     content: post?.content ?? "",
@@ -36,7 +36,7 @@ export default function PostEditor({ post }: { post?: Post }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.title || !form.content) {
-      setError("Title and content are required.");
+      setError("标题和正文不能为空。");
       return;
     }
     setLoading(true);
@@ -55,7 +55,7 @@ export default function PostEditor({ post }: { post?: Post }) {
       router.refresh();
     } else {
       const body = await res.json().catch(() => ({}));
-      setError(body.error || "Something went wrong.");
+      setError(body.error || "保存失败，请稍后再试。");
       setLoading(false);
     }
   }

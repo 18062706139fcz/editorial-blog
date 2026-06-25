@@ -14,7 +14,7 @@ export default function LogoutButton() {
       onClick={logout}
       className="font-mono text-[11px] uppercase tracking-label text-ink-soft underline-offset-4 transition-colors hover:text-ink hover:underline"
     >
-      Sign out
+      退出
     </button>
   );
 }

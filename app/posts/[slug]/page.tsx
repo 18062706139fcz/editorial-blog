@@ -34,7 +34,7 @@ export default async function PostPage({
         href="/"
         className="font-mono text-[10px] uppercase tracking-label text-ink-soft underline-offset-4 transition-colors hover:text-accent hover:underline sm:text-[11px]"
       >
-        ← Back to all articles
+        ← 返回全部文章
       </Link>
 
       <Reveal className="mx-auto mt-9 max-w-3xl text-left sm:mt-12 sm:text-center">
@@ -45,7 +45,7 @@ export default async function PostPage({
           {post.title}
         </h1>
         <p className="mt-6 flex flex-wrap gap-x-2.5 gap-y-1 font-mono text-[10px] uppercase tracking-label text-ink-soft sm:mt-7 sm:block sm:text-[11px]">
-          {post.author} · {formatDate(post.createdAt)} · {wordCountLabel(post.content)} · {readingTime(post.content)} min read · {views.toLocaleString()} views
+          {post.author} · {formatDate(post.createdAt)} · {wordCountLabel(post.content)} · {readingTime(post.content)} 分钟 · {views.toLocaleString()} 次阅读
         </p>
       </Reveal>
 
@@ -60,7 +60,7 @@ export default async function PostPage({
           rel="noreferrer"
           className="inline-block rounded-full bg-ink px-6 py-3 font-mono text-[10px] uppercase tracking-label text-paper transition-colors hover:bg-accent sm:px-7 sm:py-3.5 sm:text-[11px]"
         >
-          Follow on GitHub →
+          去 GitHub 看看 →
         </a>
       </div>
     </article>

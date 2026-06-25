@@ -23,7 +23,7 @@ export default function ContactForm() {
 
     if (!data.name || !data.email) {
       setStatus("error");
-      setError("Name and email are required.");
+      setError("姓名和邮箱不能为空。");
       return;
     }
 
@@ -35,13 +35,13 @@ export default function ContactForm() {
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || "Submission failed.");
+        throw new Error(body.error || "发送失败，请稍后再试。");
       }
       setStatus("success");
       form.reset();
     } catch (err) {
       setStatus("error");
-      setError(err instanceof Error ? err.message : "Submission failed.");
+      setError(err instanceof Error ? err.message : "发送失败，请稍后再试。");
     }
   }
 
@@ -49,18 +49,18 @@ export default function ContactForm() {
     return (
       <div className="flex h-full min-h-[300px] flex-col items-start justify-center">
         <p className="font-mono text-[11px] uppercase tracking-label text-ink-soft">
-          Thank you
+          已收到
         </p>
         <p className="mt-4 font-serif text-3xl leading-snug text-ink">
-          Your message has landed.
+          消息已经送达。
           <br />
-          We&apos;ll be in touch shortly.
+          我会尽快回复。
         </p>
         <button
           onClick={() => setStatus("idle")}
           className="mt-8 font-mono text-[11px] uppercase tracking-label text-ink underline decoration-hairline underline-offset-4 transition-colors hover:decoration-ink"
         >
-          Send another
+          再写一条
         </button>
       </div>
     );
@@ -71,31 +71,31 @@ export default function ContactForm() {
       <div className="grid gap-10 sm:grid-cols-2">
         <div>
           <label htmlFor="name" className={labelClass}>
-            Name*
+            姓名*
           </label>
           <input
             id="name"
             name="name"
             type="text"
-            placeholder="Jane Doe"
+            placeholder="你的名字"
             className={inputClass}
           />
         </div>
         <div>
           <label htmlFor="company" className={labelClass}>
-            Company
+            公司
           </label>
           <input
             id="company"
             name="company"
             type="text"
-            placeholder="Acme Inc."
+            placeholder="公司或团队"
             className={inputClass}
           />
         </div>
         <div>
           <label htmlFor="phone" className={labelClass}>
-            Phone
+            电话
           </label>
           <input
             id="phone"
@@ -107,7 +107,7 @@ export default function ContactForm() {
         </div>
         <div>
           <label htmlFor="email" className={labelClass}>
-            Email*
+            邮箱*
           </label>
           <input
             id="email"
@@ -121,13 +121,13 @@ export default function ContactForm() {
 
       <div>
         <label htmlFor="message" className={labelClass}>
-          Additional info
+            补充信息
         </label>
         <textarea
           id="message"
           name="message"
           rows={3}
-          placeholder="Additional information"
+          placeholder="想聊的事情、背景或链接"
           className={`${inputClass} resize-none`}
         />
       </div>
@@ -143,7 +143,7 @@ export default function ContactForm() {
         disabled={status === "submitting"}
         className="border border-ink px-6 py-3 font-mono text-[11px] uppercase tracking-label text-ink transition-colors hover:bg-ink hover:text-paper disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {status === "submitting" ? "Sending…" : "Send message"}
+        {status === "submitting" ? "发送中…" : "发送消息"}
       </button>
     </form>
   );

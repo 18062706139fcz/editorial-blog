@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
   if (!password || !verifyPassword(String(password))) {
     return NextResponse.json(
-      { error: "Incorrect password." },
+      { error: "密码不正确。" },
       { status: 401 }
     );
   }

@@ -2,6 +2,10 @@
 
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import {
+  routeTransitionKey,
+  shouldStartRouteTransition,
+} from "@/lib/route-transition";
 
 export default function RouteTransition({
   children,
@@ -10,8 +14,7 @@ export default function RouteTransition({
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  // Full location key so query-only navigations (e.g. ?category=Essays) count.
-  const locationKey = `${pathname}?${searchParams.toString()}`;
+  const locationKey = routeTransitionKey(pathname, searchParams.toString());
   const [loading, setLoading] = useState(false);
   const prevKey = useRef(locationKey);
 
@@ -32,10 +35,15 @@ export default function RouteTransition({
         e.ctrlKey
       )
         return;
-      // Compare full destination (path + query) to the current location.
-      const [destPath = "/", destQuery = ""] = href.split("?");
-      const current = `${pathname}?${searchParams.toString()}`;
-      if (`${destPath}?${destQuery}` === current) return;
+      if (
+        !shouldStartRouteTransition({
+          href,
+          currentPathname: pathname,
+          currentSearch: searchParams.toString(),
+        })
+      ) {
+        return;
+      }
       setLoading(true);
     }
     document.addEventListener("click", onClick);
@@ -53,7 +61,7 @@ export default function RouteTransition({
 
   return (
     <>
-      {/* Page content — replays the enter animation on every route change */}
+      {/* Page content — replays the enter animation only on pathname changes. */}
       <div key={locationKey} className="animate-enter">
         {children}
       </div>

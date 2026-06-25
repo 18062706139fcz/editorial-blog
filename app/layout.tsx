@@ -27,9 +27,9 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ryker — An editorial blog",
+  title: "Ryker — 文章与短札",
   description:
-    "An editorial, literary blog on AI engineering, prompting, and craft.",
+    "关于 AI 工程、提示词、代理系统和软件品味的个人博客。",
 };
 
 export default function RootLayout({
@@ -39,7 +39,7 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="en"
+      lang="zh-CN"
       className={`${serif.variable} ${sans.variable} ${mono.variable}`}
     >
       <body className="min-h-screen bg-paper font-sans text-ink antialiased">

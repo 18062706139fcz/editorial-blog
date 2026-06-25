@@ -2,12 +2,23 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import Logomark from "@/components/Logomark";
 import OnlineCount from "@/components/OnlineCount";
+
+const navItems = [
+  { href: "/", label: "文章" },
+  { href: "/thinking", label: "短札" },
+];
 
 export default function Nav() {
   const [hidden, setHidden] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const pathname = usePathname();
+  const activeIndex = navItems.findIndex((item) =>
+    item.href === "/" ? pathname === "/" : pathname.startsWith(item.href),
+  );
+  const safeActiveIndex = activeIndex < 0 ? 0 : activeIndex;
 
   useEffect(() => {
     let lastY = window.scrollY;
@@ -40,7 +51,38 @@ export default function Nav() {
             Ryker
           </span>
         </Link>
-        <nav className="flex items-center gap-7">
+        <nav className="flex items-center gap-3 sm:gap-5">
+          <div className="relative grid grid-cols-2 rounded-full border border-hairline bg-paper/70 p-1 shadow-[0_10px_30px_-24px_rgba(28,25,22,0.35)]">
+            <span
+              aria-hidden
+              className="absolute bottom-1 left-1 top-1 rounded-full bg-ink shadow-[0_8px_22px_-16px_rgba(0,0,0,0.65)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+              style={{
+                width: "calc(50% - 0.25rem)",
+                transform: `translateX(${safeActiveIndex * 100}%)`,
+              }}
+            />
+            {navItems.map((item) => {
+              const active =
+                item.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(item.href);
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={`relative z-10 min-w-[3.65rem] rounded-full px-3 py-1.5 text-center font-mono text-[10px] uppercase tracking-label transition-colors duration-200 sm:px-3.5 sm:text-[11px] ${
+                    active
+                      ? "text-paper delay-100"
+                      : "text-ink-soft hover:text-ink"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
           <OnlineCount />
         </nav>
       </div>

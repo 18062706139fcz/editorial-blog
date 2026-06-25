@@ -4,16 +4,16 @@ import { useEffect, useState } from "react";
 
 // Maps Open-Meteo WMO weather codes to a color emoji (VS16-forced) + label.
 function describe(code: number): { icon: string; label: string } {
-  if (code === 0) return { icon: "☀️", label: "Clear" };
-  if (code <= 2) return { icon: "⛅️", label: "Partly cloudy" };
-  if (code === 3) return { icon: "☁️", label: "Overcast" };
-  if (code <= 48) return { icon: "🌫️", label: "Fog" };
-  if (code <= 57) return { icon: "🌦️", label: "Drizzle" };
-  if (code <= 67) return { icon: "🌧️", label: "Rain" };
-  if (code <= 77) return { icon: "❄️", label: "Snow" };
-  if (code <= 82) return { icon: "🌧️", label: "Showers" };
-  if (code <= 86) return { icon: "🌨️", label: "Snow showers" };
-  return { icon: "⛈️", label: "Thunderstorm" };
+  if (code === 0) return { icon: "☀️", label: "晴" };
+  if (code <= 2) return { icon: "⛅️", label: "多云" };
+  if (code === 3) return { icon: "☁️", label: "阴" };
+  if (code <= 48) return { icon: "🌫️", label: "雾" };
+  if (code <= 57) return { icon: "🌦️", label: "小雨" };
+  if (code <= 67) return { icon: "🌧️", label: "雨" };
+  if (code <= 77) return { icon: "❄️", label: "雪" };
+  if (code <= 82) return { icon: "🌧️", label: "阵雨" };
+  if (code <= 86) return { icon: "🌨️", label: "阵雪" };
+  return { icon: "⛈️", label: "雷雨" };
 }
 
 type Status = { city: string; temp: number; icon: string; label: string };
@@ -29,7 +29,7 @@ export default function StatusBar() {
     async function resolve(lat: number, lon: number) {
       const [geo, w] = await Promise.all([
         fetch(
-          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`,
+          `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=zh-CN`,
           { signal: controller.signal },
         )
           .then((r) => r.json())
@@ -45,7 +45,7 @@ export default function StatusBar() {
         geo?.city ||
         geo?.locality ||
         geo?.principalSubdivision ||
-        "Nearby";
+        "附近";
       const code = w?.current?.weather_code ?? 0;
       const { icon, label } = describe(code);
       setStatus({

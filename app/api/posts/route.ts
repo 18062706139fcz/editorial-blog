@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   if (!body?.title || !body?.content) {
     return NextResponse.json(
-      { error: "Title and content are required." },
+      { error: "标题和正文不能为空。" },
       { status: 400 }
     );
   }
@@ -39,8 +39,8 @@ export async function POST(request: Request) {
       excerpt: String(body.excerpt || ""),
       content: String(body.content),
       coverImage: body.coverImage ? String(body.coverImage) : null,
-      author: String(body.author || "The Margin"),
-      category: String(body.category || "Essays"),
+      author: String(body.author || "Ryker"),
+      category: String(body.category || "随笔"),
       featured: Boolean(body.featured),
       published: body.published === undefined ? true : Boolean(body.published),
     },

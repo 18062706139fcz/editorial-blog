@@ -11,10 +11,10 @@ export default function AdminLoginPage() {
     <div className="flex min-h-[60vh] items-center justify-center py-12 sm:py-20">
       <div className="w-full max-w-sm">
         <p className="mb-4 font-mono text-[11px] uppercase tracking-label text-ink-soft">
-          Editor access
+          后台登录
         </p>
         <h1 className="mb-8 font-serif text-[2rem] text-ink sm:mb-10 sm:text-4xl">
-          Sign in
+          登录
         </h1>
         <LoginForm />
       </div>

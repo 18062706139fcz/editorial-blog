@@ -22,7 +22,7 @@ export default function LoginForm() {
       router.push("/admin");
       router.refresh();
     } else {
-      setError("Incorrect password.");
+      setError("密码不正确。");
       setLoading(false);
     }
   }
@@ -34,7 +34,7 @@ export default function LoginForm() {
           htmlFor="password"
           className="mb-3 block font-mono text-[10px] uppercase tracking-label text-ink-soft"
         >
-          Password
+          密码
         </label>
         <input
           id="password"
@@ -55,7 +55,7 @@ export default function LoginForm() {
         disabled={loading}
         className="w-full border border-ink px-6 py-3 font-mono text-[10px] uppercase tracking-label text-ink transition-colors hover:bg-ink hover:text-paper disabled:opacity-50 sm:text-[11px]"
       >
-        {loading ? "Signing in…" : "Sign in"}
+        {loading ? "登录中…" : "登录"}
       </button>
     </form>
   );

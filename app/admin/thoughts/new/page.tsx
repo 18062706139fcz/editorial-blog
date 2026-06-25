@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import { isAuthenticated } from "@/lib/auth";
-import PostEditor from "@/components/PostEditor";
+import ThoughtEditor from "@/components/ThoughtEditor";
 
 export const dynamic = "force-dynamic";
 
-export default function NewPostPage() {
+export default function NewThoughtPage() {
   if (!isAuthenticated()) redirect("/admin/login");
 
   return (
@@ -13,9 +13,9 @@ export default function NewPostPage() {
         后台
       </p>
       <h1 className="mb-9 font-serif text-[2rem] text-ink sm:mb-12 sm:text-4xl">
-        新文章
+        新短札
       </h1>
-      <PostEditor />
+      <ThoughtEditor />
     </div>
   );
 }

@@ -8,7 +8,10 @@ import StatusBar from "@/components/StatusBar";
 import Reveal from "@/components/Reveal";
 import HeroTitle from "@/components/HeroTitle";
 import FeaturedArt from "@/components/FeaturedArt";
+import MarginaliaCabinet from "@/components/MarginaliaCabinet";
 import { formatDate, countWords } from "@/lib/format";
+import { sampleArtifacts } from "@/lib/marginalia";
+import { thoughtRecordToArtifact } from "@/lib/thoughts";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +20,7 @@ export default async function Home({
 }: {
   searchParams: { category?: string };
 }) {
-  const initialCategory = searchParams.category ?? "All";
+  const initialCategory = searchParams.category ?? "全部";
 
   const featured = await prisma.post.findMany({
     where: { published: true, featured: true },
@@ -33,7 +36,7 @@ export default async function Home({
   const lead = featured[0];
   const rest = featured.slice(1);
 
-  // Hero stats — borrowed from innei.in "N 篇 · N 万字 · N 天"
+  // Hero stats, in the familiar "N 篇 · N 万字 · N 天" shape.
   const allPosts = await prisma.post.findMany({
     where: { published: true },
     select: { content: true, createdAt: true },
@@ -53,12 +56,20 @@ export default async function Home({
     Math.round((Date.now() - new Date(firstDate).getTime()) / 86400000),
   );
 
-  // Recent posts for the innei-style timeline
+  // Recent posts for the top timeline.
   const recent = await prisma.post.findMany({
     where: { published: true },
     orderBy: { createdAt: "desc" },
     take: 5,
   });
+
+  const thoughtArtifacts = await prisma.thought
+    .findMany({
+      where: { published: true, featured: true },
+      orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
+    })
+    .then((thoughts) => thoughts.map(thoughtRecordToArtifact))
+    .catch(() => []);
 
   return (
     <div className="pb-4">
@@ -69,28 +80,22 @@ export default async function Home({
             <StatusBar />
           </div>
           <h1 className="sr-only">
-            Hi, I’m Ryker. I write about AI and the craft of building software
-            with taste.
+            我是 Ryker，记录 AI、代理和带着判断力构建软件这件事。
           </h1>
           <div className="flex items-center justify-between gap-8">
             <div aria-hidden className="text-balance">
               <HeroTitle
                 words={[
-                  "Hi,",
-                  "I’m",
-                  "Ryker —",
-                  "I",
-                  "write",
-                  "about",
-                  "AI",
-                  "and",
-                  "the",
-                  "craft",
-                  "of",
-                  "building",
-                  "software",
-                  "with",
-                  "taste.",
+                  "我",
+                  "写",
+                  "AI、",
+                  "代理，",
+                  "也",
+                  "写",
+                  "把",
+                  "软件",
+                  "做得",
+                  "有判断。",
                 ]}
                 accentIndex={2}
               />
@@ -107,15 +112,14 @@ export default async function Home({
         <Reveal delay={150}>
           <div className="mt-8 flex flex-col gap-6 border-t border-hairline pt-6 sm:mt-12 sm:flex-row sm:items-end sm:justify-between sm:gap-8 sm:pt-8">
             <p className="max-w-md text-base leading-relaxed text-ink-soft sm:text-lg">
-              Essays and field notes on prompting, agents, and shipping
-              thoughtful software — written between the lines of daily work.
+              关于提示词、代理系统和软件品味的文章与现场笔记，写在日常工作缝隙里。
             </p>
             <div className="flex flex-wrap items-center gap-5">
               <Link
                 href="#articles"
                 className="group inline-flex items-center gap-3 rounded-full bg-ink px-6 py-3 font-mono text-[10px] uppercase tracking-label text-paper transition-colors duration-300 hover:bg-accent sm:px-7 sm:py-3.5 sm:text-[11px]"
               >
-                Read the journal
+                阅读文章
                 <span className="transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1">
                   ↓
                 </span>
@@ -157,14 +161,14 @@ export default async function Home({
         </Reveal>
       </section>
 
-      {/* ── Recent writing timeline (innei-style) ────────────── */}
+      {/* ── Recent writing timeline ──────────────────────────── */}
       <section className="border-t border-hairline py-14 sm:py-20">
         <div className="mb-8 flex flex-wrap items-baseline gap-x-3 gap-y-1 sm:mb-10">
           <h2 className="font-serif text-[1.75rem] tracking-tight text-ink sm:text-3xl">
-            Recent writing
+            最近写下
           </h2>
           <span className="font-mono text-[11px] uppercase tracking-label text-ink-soft">
-            / 近期笔墨
+            / 新近
           </span>
         </div>
         <Timeline posts={recent} />
@@ -176,14 +180,14 @@ export default async function Home({
           <div className="mb-8 flex flex-col gap-2 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <h2 className="font-serif text-[1.75rem] tracking-tight text-ink sm:text-3xl">
-                Featured
+                精选文章
               </h2>
               <span className="font-mono text-[11px] uppercase tracking-label text-ink-soft">
                 / 精选
               </span>
             </div>
             <span className="font-mono text-[11px] uppercase tracking-label text-ink-soft">
-              Editor’s picks
+              编辑选择
             </span>
           </div>
 
@@ -200,7 +204,7 @@ export default async function Home({
                 <p className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-label text-ink-soft sm:mt-6">
                   {lead.author} · {formatDate(lead.createdAt)}
                   <span className="inline-flex items-center gap-1.5 text-accent opacity-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1 group-hover:opacity-100">
-                    Read <span>→</span>
+                    阅读 <span>→</span>
                   </span>
                 </p>
               </Link>
@@ -227,7 +231,7 @@ export default async function Home({
                         {post.excerpt}
                       </p>
                       <span className="mt-3 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-accent opacity-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1 group-hover:opacity-100">
-                        Read <span>→</span>
+                        阅读 <span>→</span>
                       </span>
                     </div>
                   </Link>
@@ -237,6 +241,14 @@ export default async function Home({
           </div>
         </section>
       )}
+
+      <MarginaliaCabinet
+        artifacts={
+          thoughtArtifacts.length
+            ? [...thoughtArtifacts, ...sampleArtifacts]
+            : sampleArtifacts
+        }
+      />
 
       {/* ── All articles ─────────────────────────────────────── */}
       <section

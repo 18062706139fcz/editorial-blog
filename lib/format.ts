@@ -1,7 +1,7 @@
 export function formatDate(date: Date) {
-  return new Date(date).toLocaleDateString("en-US", {
+  return new Date(date).toLocaleDateString("zh-CN", {
     year: "numeric",
-    month: "short",
+    month: "long",
     day: "numeric",
   });
 }
@@ -43,9 +43,9 @@ export function readingTime(content: string) {
   return Math.max(1, Math.round(words / 400));
 }
 
-// Compact word count label, e.g. "1.3k 字" / "320 字"
+// Compact word count label, e.g. "1.3 千字" / "320 字"
 export function wordCountLabel(content: string) {
   const n = countWords(content);
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}k 字`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1)} 千字`;
   return `${n} 字`;
 }

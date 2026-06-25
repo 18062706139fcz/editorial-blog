@@ -47,13 +47,13 @@ export default function OnlineCount() {
   return (
     <span
       className="hidden items-center gap-2 font-mono text-[11px] uppercase tracking-label text-ink-soft sm:inline-flex"
-      title={`${online} reading now`}
+      title={`${online} 人正在阅读`}
     >
       <span className="relative flex h-1.5 w-1.5">
         <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-accent opacity-60" />
         <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent" />
       </span>
-      {online} online
+      {online} 在线
     </span>
   );
 }

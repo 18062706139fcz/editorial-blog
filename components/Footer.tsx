@@ -14,8 +14,7 @@ export default function Footer() {
               <p className="font-serif text-4xl tracking-tight">Ryker</p>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-paper/60">
-              Essays and notes on AI engineering, prompting, and the craft of
-              building software with taste.
+              关于 AI 工程、提示词和软件品味的文章与短札。
             </p>
           </div>
           <div className="flex flex-wrap gap-8">
@@ -23,7 +22,13 @@ export default function Footer() {
               href="/"
               className="font-mono text-[11px] uppercase tracking-label text-paper/60 transition-colors hover:text-paper"
             >
-              Home
+              文章
+            </Link>
+            <Link
+              href="/thinking"
+              className="font-mono text-[11px] uppercase tracking-label text-paper/60 transition-colors hover:text-paper"
+            >
+              短札
             </Link>
             <a
               href={GITHUB_URL}
@@ -37,7 +42,7 @@ export default function Footer() {
               href="/admin"
               className="font-mono text-[11px] uppercase tracking-label text-paper/60 transition-colors hover:text-paper"
             >
-              Admin
+              后台
             </Link>
           </div>
         </div>
@@ -46,7 +51,7 @@ export default function Footer() {
             © {new Date().getFullYear()} Ryker
           </p>
           <p className="font-mono text-[11px] uppercase tracking-label text-paper/40">
-            Made with intention
+            保持判断
           </p>
         </div>
       </div>

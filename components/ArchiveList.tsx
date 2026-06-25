@@ -41,9 +41,9 @@ export default function ArchiveList({ posts }: { posts: Post[] }) {
                 <span className="hidden h-2.5 w-px bg-hairline sm:inline-block" />
                 <span>{wordCountLabel(post.content)}</span>
                 <span className="h-2.5 w-px bg-hairline" />
-                <span>{readingTime(post.content)} min</span>
+                <span>{readingTime(post.content)} 分钟</span>
                 <span className="h-2.5 w-px bg-hairline" />
-                <span>{post.views.toLocaleString()} views</span>
+                <span>{post.views.toLocaleString()} 次阅读</span>
               </div>
             </div>
 

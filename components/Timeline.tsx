@@ -38,7 +38,7 @@ export default function Timeline({ posts }: { posts: Post[] }) {
                   <span className="h-2.5 w-px bg-hairline" />
                   <span>{wordCountLabel(post.content)}</span>
                   <span className="h-2.5 w-px bg-hairline" />
-                  <span>{post.views.toLocaleString()} views</span>
+                  <span>{post.views.toLocaleString()} 次阅读</span>
                 </div>
                 <h3 className="mt-2 font-serif text-[1.2rem] font-light leading-snug tracking-tight text-ink transition-colors duration-300 group-hover:text-accent sm:text-2xl">
                   {post.title}

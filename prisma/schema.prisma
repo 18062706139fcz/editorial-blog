@@ -24,6 +24,35 @@ model Post {
   updatedAt  DateTime @updatedAt
 }
 
+model Thought {
+  id                Int      @id @default(autoincrement())
+  kind              String   @default("Observation")
+  title             String
+  body              String
+  thread            String   @default("随想")
+  tone              String   @default("Paper")
+  size              String   @default("Small")
+  source            String?
+  href              String?
+  items             String?
+  tags              String?
+  objectLabel       String?
+  objectTitle       String?
+  objectMeta        String?
+  objectDescription String?
+  pinned            Boolean  @default(false)
+  featured          Boolean  @default(false)
+  published         Boolean  @default(true)
+  views             Int      @default(0)
+  likes             Int      @default(0)
+  comments          Int      @default(0)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([published, createdAt])
+  @@index([featured, pinned])
+}
+
 model ContactMessage {
   id        Int      @id @default(autoincrement())
   name      String
