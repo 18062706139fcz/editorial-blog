@@ -76,8 +76,8 @@ test("night radio uses a full-bleed dark stage with Chen Li tracks", () => {
   assert.match(nightRadio, /种种/);
   assert.match(nightRadio, /artist:\s*"陈粒"/);
   assert.match(nightRadio, /当前曲目：/);
-  assert.match(config, /今晚只放陈粒/);
-  assert.match(config, /奇妙能力、正趣果上果和种种/);
+  assert.match(config, /今晚只开一盏小灯/);
+  assert.match(config, /放三首陈粒/);
   assert.equal(nightRadio.includes("世界正中"), false);
   assert.equal(config.includes("不是 dark mode"), false);
 });
@@ -104,11 +104,14 @@ test("night radio record and play control have motion-oriented styling", () => {
   assert.match(nightRadio, /coverUrl/);
   assert.match(nightRadio, /data-turntable/);
   assert.match(nightRadio, /data-tonearm/);
+  assert.match(nightRadio, /data-lyric-panel/);
+  assert.match(nightRadio, /captionCopy/);
   assert.match(nightRadio, /max-w-\[31rem\]/);
   assert.match(nightRadio, /motion-safe:animate-\[spin_11s_linear_infinite\]/);
   assert.match(nightRadio, /motion-safe:animate-\[record-sheen/);
   assert.match(nightRadio, /motion-safe:animate-\[equalizer/);
   assert.equal(nightRadio.includes("lg:-mr-24"), false);
+  assert.equal(nightRadio.includes("absolute left-1/2 top-1/2 h-3 w-3"), false);
   assert.equal(nightRadio.includes("rounded-full bg-[#dd3f35] px-5"), false);
   assert.equal(nightRadio.includes("min-w-28"), false);
   assert.match(nightRadio, /aria-label=\{playing \? "暂停夜间音乐台" : "播放夜间音乐台"\}/);

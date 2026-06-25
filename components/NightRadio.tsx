@@ -12,6 +12,11 @@ type TrackSource = {
   type: string | null;
 };
 
+type CaptionLine = {
+  at: number;
+  text: string;
+};
+
 const tracks = [
   {
     title: "奇妙能力歌",
@@ -24,6 +29,13 @@ const tracks = [
       "https://p2.music.126.net/cpoUinrExafBHL5Nv5iDHQ==/109951166361218466.jpg",
     accent: "#d9473f",
     note: "网易云可免费播放的陈粒曲目，走真实音频源。",
+    captions: [
+      { at: 0, text: "先把房间调暗一点，让声音慢慢靠近。" },
+      { at: 34, text: "有些念头不必立刻回答，先和旋律待一会儿。" },
+      { at: 82, text: "奇妙的不是能力，是还愿意相信一点微光。" },
+      { at: 142, text: "白天没有收好的情绪，今晚交给唱片暂存。" },
+      { at: 206, text: "等这一面转完，再决定要不要继续往前。" },
+    ],
   },
   {
     title: "正趣果上果",
@@ -36,6 +48,13 @@ const tracks = [
       "https://p2.music.126.net/VuJFMbXzpAProbJPoXLv7g==/7721870161993398.jpg",
     accent: "#c8501e",
     note: "来自《如也》的《正趣果上果》，用当前可用音频 URL 播放。",
+    captions: [
+      { at: 0, text: "偏一点的趣味，也可以是很正经的答案。" },
+      { at: 30, text: "红色信号慢慢亮起，像一颗不急着成熟的果。" },
+      { at: 76, text: "把漂亮和古怪放在一起，夜里会更合拍。" },
+      { at: 132, text: "不解释太多，旋律会替它找到自己的方向。" },
+      { at: 188, text: "这一首适合给固执的灵感留一张椅子。" },
+    ],
   },
   {
     title: "种种",
@@ -48,6 +67,13 @@ const tracks = [
       "https://p1.music.126.net/jeWHIkiTkBglJKxte7p6JA==/109951172059186762.jpg",
     accent: "#dd3f35",
     note: "使用《十年自选》里的可播放版本。",
+    captions: [
+      { at: 0, text: "那些没有归类的情绪，夜里会自己排成队。" },
+      { at: 28, text: "种种不是总结，是还没完全放下的回声。" },
+      { at: 72, text: "听到这里，可以先不判断它属于哪一种。" },
+      { at: 120, text: "有些旧事不需要翻新，只要轻轻放回原处。" },
+      { at: 162, text: "收尾的时候，让安静比答案多停一秒。" },
+    ],
   },
 ];
 
@@ -58,6 +84,14 @@ function formatTime(value: number) {
   const minutes = Math.floor(value / 60);
   const seconds = Math.floor(value % 60);
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
+function selectCaption(lines: CaptionLine[], time: number) {
+  let selected = lines[0]?.text ?? "";
+  for (const line of lines) {
+    if (time >= line.at) selected = line.text;
+  }
+  return selected;
 }
 
 export default function NightRadio({ room }: { room: HiddenRoom }) {
@@ -76,6 +110,9 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
   const recordGlow = playing ? "opacity-100" : "opacity-25";
   const recordNeedle = playing ? "rotate-[7deg]" : "-rotate-[9deg]";
   const currentMusicCopy = `当前曲目：${activeTrack.artist}《${activeTrack.title}》`;
+  const captionCopy = playing
+    ? selectCaption(activeTrack.captions, currentTime)
+    : "按下播放，让一句夜里的字幕慢慢浮上来。";
 
   useEffect(() => {
     let cancelled = false;
@@ -160,8 +197,24 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
             <span>{room.coordinate}</span>
           </div>
 
+          <audio
+            ref={audioRef}
+            src={source?.url}
+            preload="metadata"
+            onPlay={() => setPlaying(true)}
+            onPause={() => setPlaying(false)}
+            onEnded={() => setPlaying(false)}
+            onTimeUpdate={(event) => {
+              setCurrentTime(event.currentTarget.currentTime);
+            }}
+            onLoadedMetadata={(event) => {
+              const nextDuration = event.currentTarget.duration;
+              if (Number.isFinite(nextDuration)) setDuration(nextDuration);
+            }}
+          />
+
           <div className="mt-7 grid gap-8 lg:grid-cols-[19rem_minmax(0,1fr)] lg:items-center">
-            <div className="flex min-h-full flex-col justify-between gap-8">
+            <div>
               <div>
                 <p className="font-mono text-[10px] uppercase tracking-label text-[#dd3f35]">
                   now playing
@@ -174,95 +227,23 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
                 </p>
               </div>
 
-              <div className="overflow-hidden rounded-[8px] border border-white/10 bg-[#09090b] p-4">
-                <audio
-                  ref={audioRef}
-                  src={source?.url}
-                  preload="metadata"
-                  onPlay={() => setPlaying(true)}
-                  onPause={() => setPlaying(false)}
-                  onEnded={() => setPlaying(false)}
-                  onTimeUpdate={(event) => {
-                    setCurrentTime(event.currentTarget.currentTime);
-                  }}
-                  onLoadedMetadata={(event) => {
-                    const nextDuration = event.currentTarget.duration;
-                    if (Number.isFinite(nextDuration)) setDuration(nextDuration);
-                  }}
-                />
-
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="font-mono text-[10px] uppercase tracking-label text-white/38">
-                      {activeTrack.artist} / {activeTrack.bpm} /{" "}
-                      {activeTrack.duration}
-                    </p>
-                    <h2 className="mt-2 truncate font-serif text-2xl font-light leading-tight">
-                      {activeTrack.title}
-                    </h2>
-                    <p className="mt-2 text-sm leading-relaxed text-white/55">
-                      {currentMusicCopy}
-                    </p>
-                    {(sourceError || playbackError) && (
-                      <p className="mt-2 text-xs leading-relaxed text-[#ff766d]/85">
-                        {sourceError || playbackError}
-                      </p>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    aria-label={playing ? "暂停夜间音乐台" : "播放夜间音乐台"}
-                    disabled={loadingSource || !source}
-                    onClick={togglePlayback}
-                    className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-white/14 bg-[#f7f0e8] text-[#151214] shadow-[0_16px_36px_-22px_rgba(0,0,0,1)] transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/30"
-                  >
-                    <span className="grid h-7 w-7 place-items-center rounded-full bg-[#dd3f35] text-white">
-                      {playing ? (
-                        <span className="flex gap-0.5">
-                          <span className="h-3 w-1 rounded-full bg-current" />
-                          <span className="h-3 w-1 rounded-full bg-current" />
-                        </span>
-                      ) : (
-                        <span className="ml-0.5 h-0 w-0 border-y-[5px] border-l-[8px] border-y-transparent border-l-current" />
-                      )}
-                    </span>
-                  </button>
-                </div>
-
-                <div className="mt-5">
-                  <button
-                    type="button"
-                    aria-label="跳转播放进度"
-                    onClick={seekTo}
-                    className="block h-1.5 w-full overflow-hidden rounded-full bg-white/10 text-left"
-                  >
-                    <span
-                      className="block h-full rounded-full bg-[linear-gradient(90deg,#dd3f35,#ff766d)] transition-[width] duration-150"
-                      style={{ width: `${progress}%` }}
-                    />
-                  </button>
-                  <div className="mt-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-label text-white/35">
-                    <span>{formatTime(currentTime)}</span>
-                    <span>{formatTime(duration)}</span>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex h-8 items-end gap-1">
-                  {visualizerBars.map((height, index) => (
-                    <span
-                      key={`${height}-${index}`}
-                      className={`w-full rounded-t-[3px] bg-[#dd3f35] ${
-                        playing
-                          ? "opacity-80 motion-safe:animate-[equalizer_0.9s_ease-in-out_infinite]"
-                          : "opacity-24"
-                      }`}
-                      style={{
-                        height: `${height}%`,
-                        animationDelay: `${index * 55}ms`,
-                      }}
-                    />
-                  ))}
-                </div>
+              <div
+                data-lyric-panel
+                className="mt-8 rounded-[8px] border border-white/10 bg-[#09090b]/72 p-4"
+              >
+                <p className="font-mono text-[10px] uppercase tracking-label text-white/35">
+                  lyric trace
+                </p>
+                <p
+                  className={`mt-3 min-h-[4.5rem] font-serif text-2xl font-light leading-snug transition-colors duration-300 ${
+                    playing ? "text-[#f7f0e8]" : "text-white/42"
+                  }`}
+                >
+                  {captionCopy}
+                </p>
+                <p className="mt-4 font-mono text-[10px] uppercase tracking-label text-[#dd3f35]/80">
+                  {playing ? activeTrack.title : "waiting for music"}
+                </p>
               </div>
             </div>
 
@@ -322,10 +303,6 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
                     className="absolute inset-[30%] rounded-full border border-white/35 bg-cover bg-center shadow-[0_0_0_9px_rgba(0,0,0,0.35),inset_0_0_22px_rgba(0,0,0,0.38)]"
                     style={{ backgroundImage: `url(${activeTrack.coverUrl})` }}
                   />
-                  <span
-                    aria-hidden
-                    className="absolute left-1/2 top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#f7f0e8] shadow-[0_0_0_4px_rgba(0,0,0,0.5)]"
-                  />
                 </div>
                 <svg
                   data-tonearm
@@ -376,6 +353,94 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
                     transform="rotate(39 166 201)"
                   />
                 </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-7 overflow-hidden rounded-[8px] border border-white/10 bg-[#09090b] p-4">
+            <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_12rem] md:items-center">
+              <div className="flex min-w-0 items-center gap-4">
+                <div
+                  aria-hidden
+                  className={`h-14 w-14 shrink-0 rounded-[8px] border border-white/10 bg-cover bg-center shadow-[0_12px_32px_-22px_rgba(0,0,0,1)] ${
+                    playing
+                      ? "motion-safe:animate-[album-breathe_2.4s_ease-in-out_infinite]"
+                      : ""
+                  }`}
+                  style={{ backgroundImage: `url(${activeTrack.coverUrl})` }}
+                />
+                <div className="min-w-0">
+                  <p className="font-mono text-[10px] uppercase tracking-label text-white/38">
+                    {activeTrack.artist} / {activeTrack.bpm} /{" "}
+                    {activeTrack.duration}
+                  </p>
+                  <h2 className="mt-1 truncate font-serif text-2xl font-light leading-tight">
+                    {activeTrack.title}
+                  </h2>
+                  <p className="mt-1 text-sm leading-relaxed text-white/55">
+                    {currentMusicCopy}
+                  </p>
+                  {(sourceError || playbackError) && (
+                    <p className="mt-1 text-xs leading-relaxed text-[#ff766d]/85">
+                      {sourceError || playbackError}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-4 md:justify-end">
+                <div className="flex h-8 w-28 shrink-0 items-end gap-1">
+                  {visualizerBars.slice(0, 8).map((height, index) => (
+                    <span
+                      key={`${height}-${index}`}
+                      className={`w-full rounded-t-[3px] bg-[#dd3f35] ${
+                        playing
+                          ? "opacity-80 motion-safe:animate-[equalizer_0.9s_ease-in-out_infinite]"
+                          : "opacity-24"
+                      }`}
+                      style={{
+                        height: `${height}%`,
+                        animationDelay: `${index * 55}ms`,
+                      }}
+                    />
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  aria-label={playing ? "暂停夜间音乐台" : "播放夜间音乐台"}
+                  disabled={loadingSource || !source}
+                  onClick={togglePlayback}
+                  className="grid h-12 w-12 shrink-0 place-items-center rounded-full border border-white/14 bg-[#f7f0e8] text-[#151214] shadow-[0_16px_36px_-22px_rgba(0,0,0,1)] transition-transform hover:scale-105 disabled:cursor-not-allowed disabled:bg-white/10 disabled:text-white/30"
+                >
+                  <span className="grid h-7 w-7 place-items-center rounded-full bg-[#dd3f35] text-white">
+                    {playing ? (
+                      <span className="flex gap-0.5">
+                        <span className="h-3 w-1 rounded-full bg-current" />
+                        <span className="h-3 w-1 rounded-full bg-current" />
+                      </span>
+                    ) : (
+                      <span className="ml-0.5 h-0 w-0 border-y-[5px] border-l-[8px] border-y-transparent border-l-current" />
+                    )}
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-5">
+              <button
+                type="button"
+                aria-label="跳转播放进度"
+                onClick={seekTo}
+                className="block h-1.5 w-full overflow-hidden rounded-full bg-white/10 text-left"
+              >
+                <span
+                  className="block h-full rounded-full bg-[linear-gradient(90deg,#dd3f35,#ff766d)] transition-[width] duration-150"
+                  style={{ width: `${progress}%` }}
+                />
+              </button>
+              <div className="mt-3 flex items-center justify-between font-mono text-[10px] uppercase tracking-label text-white/35">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
               </div>
             </div>
           </div>
