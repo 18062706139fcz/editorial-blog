@@ -6,6 +6,7 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import RouteTransition from "@/components/RouteTransition";
 import ReadingProgress from "@/components/ReadingProgress";
+import RouteTheme from "@/components/RouteTheme";
 
 const serif = Fraunces({
   subsets: ["latin"],
@@ -43,6 +44,7 @@ export default function RootLayout({
       className={`${serif.variable} ${sans.variable} ${mono.variable}`}
     >
       <body className="min-h-screen bg-paper font-sans text-ink antialiased">
+        <RouteTheme />
         <ReadingProgress />
         <Nav />
         <main className="mx-auto w-full max-w-6xl px-6">

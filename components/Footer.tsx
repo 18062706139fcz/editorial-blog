@@ -1,11 +1,23 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import Logomark from "@/components/Logomark";
 
 const GITHUB_URL = "https://github.com/ryker";
 
 export default function Footer() {
+  const pathname = usePathname();
+  const isNightRoute = pathname === "/night";
+
   return (
-    <footer className="mt-28 bg-ink text-paper">
+    <footer
+      className={`bg-ink text-paper ${
+        isNightRoute
+          ? "mt-0 border-t border-white/10 bg-[#171411]"
+          : "mt-28"
+      }`}
+    >
       <div className="mx-auto w-full max-w-6xl px-6 py-16">
         <div className="flex flex-col gap-10 sm:flex-row sm:items-end sm:justify-between">
           <div>

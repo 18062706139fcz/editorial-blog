@@ -3,6 +3,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import Reveal from "@/components/Reveal";
 import Markdown from "@/components/Markdown";
+import PostEasterEgg from "@/components/PostEasterEgg";
 import { formatDate, wordCountLabel, readingTime } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -27,7 +28,6 @@ export default async function PostPage({
     })
     .then((r) => r.views)
     .catch(() => post.views);
-
   return (
     <article className="py-10 sm:py-16">
       <Link
@@ -53,7 +53,11 @@ export default async function PostPage({
         <Markdown content={post.content} />
       </div>
 
-      <div className="mx-auto mt-12 max-w-2xl border-t border-hairline pt-8 text-center sm:mt-16 sm:pt-10">
+      <div className="mx-auto mt-12 max-w-2xl sm:mt-16">
+        <PostEasterEgg slug={post.slug} />
+      </div>
+
+      <div className="mx-auto mt-12 flex max-w-2xl justify-center border-t border-hairline pt-8 text-center sm:mt-16 sm:pt-10">
         <a
           href="https://github.com/ryker"
           target="_blank"

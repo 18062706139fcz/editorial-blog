@@ -18,7 +18,8 @@ export default function Nav() {
   const activeIndex = navItems.findIndex((item) =>
     item.href === "/" ? pathname === "/" : pathname.startsWith(item.href),
   );
-  const safeActiveIndex = activeIndex < 0 ? 0 : activeIndex;
+  const hasActiveItem = activeIndex >= 0;
+  const isNightRoute = pathname === "/night";
 
   useEffect(() => {
     let lastY = window.scrollY;
@@ -40,27 +41,43 @@ export default function Nav() {
         hidden ? "-translate-y-full" : "translate-y-0"
       } ${
         scrolled
-          ? "border-hairline bg-paper/85"
-          : "border-transparent bg-paper/60"
+          ? isNightRoute
+            ? "border-white/10 bg-[#050506]/92"
+            : "border-hairline bg-paper/85"
+          : isNightRoute
+            ? "border-white/10 bg-[#050506]/88"
+            : "border-transparent bg-paper/60"
       }`}
     >
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
         <Link href="/" className="group flex items-center gap-2.5">
           <Logomark className="h-8 w-8 text-[20px] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-rotate-6" />
-          <span className="font-serif text-2xl font-medium tracking-tight text-ink">
+          <span
+            className={`font-serif text-2xl font-medium tracking-tight ${
+              isNightRoute ? "text-[#f7f0e8]" : "text-ink"
+            }`}
+          >
             Ryker
           </span>
         </Link>
         <nav className="flex items-center gap-3 sm:gap-5">
-          <div className="relative grid grid-cols-2 rounded-full border border-hairline bg-paper/70 p-1 shadow-[0_10px_30px_-24px_rgba(28,25,22,0.35)]">
-            <span
-              aria-hidden
-              className="absolute bottom-1 left-1 top-1 rounded-full bg-ink shadow-[0_8px_22px_-16px_rgba(0,0,0,0.65)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-              style={{
-                width: "calc(50% - 0.25rem)",
-                transform: `translateX(${safeActiveIndex * 100}%)`,
-              }}
-            />
+          <div
+            className={`relative grid grid-cols-2 rounded-full border p-1 shadow-[0_10px_30px_-24px_rgba(28,25,22,0.35)] ${
+              isNightRoute
+                ? "border-white/12 bg-white/[0.03]"
+                : "border-hairline bg-paper/70"
+            }`}
+          >
+            {hasActiveItem ? (
+              <span
+                aria-hidden
+                className="absolute bottom-1 left-1 top-1 rounded-full bg-ink shadow-[0_8px_22px_-16px_rgba(0,0,0,0.65)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                style={{
+                  width: "calc(50% - 0.25rem)",
+                  transform: `translateX(${activeIndex * 100}%)`,
+                }}
+              />
+            ) : null}
             {navItems.map((item) => {
               const active =
                 item.href === "/"
@@ -72,18 +89,20 @@ export default function Nav() {
                   key={item.href}
                   href={item.href}
                   aria-current={active ? "page" : undefined}
-                  className={`relative z-10 min-w-[3.65rem] rounded-full px-3 py-1.5 text-center font-mono text-[10px] uppercase tracking-label transition-colors duration-200 sm:px-3.5 sm:text-[11px] ${
-                    active
-                      ? "text-paper delay-100"
+                className={`relative z-10 min-w-[3.65rem] rounded-full px-3 py-1.5 text-center font-mono text-[10px] uppercase tracking-label transition-colors duration-200 sm:px-3.5 sm:text-[11px] ${
+                  active
+                    ? "text-paper delay-100"
+                    : isNightRoute
+                      ? "text-white/48 hover:text-white"
                       : "text-ink-soft hover:text-ink"
-                  }`}
-                >
+                }`}
+              >
                   {item.label}
                 </Link>
               );
             })}
           </div>
-          <OnlineCount />
+          <OnlineCount tone={isNightRoute ? "dark" : "light"} />
         </nav>
       </div>
     </header>

@@ -12,9 +12,18 @@
     background-color: #faf8f2;
     color: #1c1916;
   }
+  html[data-route-theme="night"],
+  html[data-route-theme="night"] body {
+    background-color: #050506;
+    color: #f7f0e8;
+  }
   ::selection {
     background-color: #1c1916;
     color: #faf8f2;
+  }
+  html[data-route-theme="night"] ::selection {
+    background-color: #f7f0e8;
+    color: #050506;
   }
 }
 
@@ -30,5 +39,44 @@
 
   .no-scrollbar::-webkit-scrollbar {
     display: none;
+  }
+}
+
+@keyframes record-sheen {
+  0%,
+  42% {
+    opacity: 0;
+    transform: rotate(0deg);
+  }
+  58% {
+    opacity: 0.42;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes equalizer {
+  0%,
+  100% {
+    transform: scaleY(0.48);
+    opacity: 0.42;
+  }
+  50% {
+    transform: scaleY(1);
+    opacity: 0.88;
+  }
+}
+
+@keyframes album-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 12px 32px -22px rgba(0, 0, 0, 1);
+  }
+  50% {
+    transform: scale(1.035);
+    box-shadow: 0 16px 44px -24px rgba(221, 63, 53, 0.7);
   }
 }

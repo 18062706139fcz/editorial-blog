@@ -1,47 +1,60 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-type Quote = { text: string; source: string };
-
-const FALLBACK: Quote = {
-  text: "我们塑造工具，此后工具塑造我们。",
-  source: "McLuhan",
-};
+import {
+  HITOKOTO_ENDPOINT,
+  normalizeHitokotoQuote,
+  type Quote,
+} from "@/lib/living-site";
 
 export default function RandomQuote() {
   const [quote, setQuote] = useState<Quote | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
-    fetch("https://v1.hitokoto.cn/?c=d&c=i&c=k", {
-      signal: controller.signal,
-    })
-      .then((r) => r.json())
-      .then((data: { hitokoto: string; from?: string; from_who?: string }) => {
-        const source = [data.from_who, data.from]
-          .filter(Boolean)
-          .join("·");
-        setQuote({ text: data.hitokoto, source: source || "一言" });
-      })
-      .catch((err) => {
-        // Ignore aborts (e.g. React StrictMode's double-mount in dev).
-        if (err?.name === "AbortError") return;
-        setQuote(FALLBACK);
-      });
-    return () => controller.abort();
+
+    async function loadQuote() {
+      try {
+        const response = await fetch(HITOKOTO_ENDPOINT, {
+          signal: controller.signal,
+        });
+        const data = await response.json();
+        setQuote(normalizeHitokotoQuote(data));
+      } catch {
+        if (!controller.signal.aborted) {
+          setQuote(
+            normalizeHitokotoQuote({
+              hitokoto: "我们塑造工具，此后工具塑造我们。",
+              from_who: "McLuhan",
+            }),
+          );
+        }
+      }
+    }
+
+    loadQuote();
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   return (
-    <figure className="mx-auto flex min-h-[3rem] max-w-xl items-center justify-center text-center">
+    <figure className="mx-auto flex min-h-[5rem] max-w-xl items-center justify-center text-center">
       {quote ? (
-        <div key={quote.text} className="animate-fade-up">
-          <blockquote className="font-serif text-sm italic leading-relaxed text-ink-soft sm:text-lg">
+        <div
+          key={quote.text}
+          className="animate-fade-up rounded-[8px] border border-hairline bg-paper-dim/70 px-5 py-4 shadow-[0_24px_70px_-48px_rgba(28,25,22,0.55)]"
+        >
+          <figcaption className="font-mono text-[10px] uppercase tracking-label text-accent">
+            一言
+          </figcaption>
+          <blockquote className="mt-2 font-serif text-sm italic leading-relaxed text-ink-soft sm:text-lg">
             「{quote.text}」
           </blockquote>
-          <figcaption className="mt-2 font-mono text-[10px] uppercase tracking-label text-ink-soft/70">
-            — {quote.source}
-          </figcaption>
+          <p className="mt-2 font-mono text-[10px] uppercase tracking-label text-ink-soft/70">
+            {quote.source}
+          </p>
         </div>
       ) : (
         <span

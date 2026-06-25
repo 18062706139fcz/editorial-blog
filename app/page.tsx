@@ -4,14 +4,11 @@ import Archive from "@/components/Archive";
 import Timeline from "@/components/Timeline";
 import RandomQuote from "@/components/RandomQuote";
 import SocialLinks from "@/components/SocialLinks";
-import StatusBar from "@/components/StatusBar";
+import LivingStatus from "@/components/LivingStatus";
 import Reveal from "@/components/Reveal";
 import HeroTitle from "@/components/HeroTitle";
 import FeaturedArt from "@/components/FeaturedArt";
-import MarginaliaCabinet from "@/components/MarginaliaCabinet";
 import { formatDate, countWords } from "@/lib/format";
-import { sampleArtifacts } from "@/lib/marginalia";
-import { thoughtRecordToArtifact } from "@/lib/thoughts";
 
 export const dynamic = "force-dynamic";
 
@@ -63,73 +60,68 @@ export default async function Home({
     take: 5,
   });
 
-  const thoughtArtifacts = await prisma.thought
-    .findMany({
-      where: { published: true, featured: true },
-      orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],
-    })
-    .then((thoughts) => thoughts.map(thoughtRecordToArtifact))
-    .catch(() => []);
-
   return (
     <div className="pb-4">
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <section className="flex min-h-[calc(100svh-4rem)] flex-col justify-center py-12 sm:min-h-screen sm:py-20">
-        <Reveal>
-          <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-3 sm:mb-8">
-            <StatusBar />
-          </div>
-          <h1 className="sr-only">
-            我是 Ryker，记录 AI、代理和带着判断力构建软件这件事。
-          </h1>
-          <div className="flex items-center justify-between gap-8">
-            <div aria-hidden className="text-balance">
-              <HeroTitle
-                words={[
-                  "我",
-                  "写",
-                  "AI、",
-                  "代理，",
-                  "也",
-                  "写",
-                  "把",
-                  "软件",
-                  "做得",
-                  "有判断。",
-                ]}
-                accentIndex={2}
-              />
+      <section className="flex flex-col justify-start pb-12 pt-10 sm:pb-16 sm:pt-12 lg:min-h-[calc(100svh-4rem)] lg:justify-center lg:py-20">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_12rem] lg:items-center lg:gap-12">
+          <Reveal>
+            <div>
+              <div className="mb-5 flex flex-wrap items-center gap-x-5 gap-y-3 sm:mb-6">
+                <LivingStatus />
+              </div>
+              <h1 className="sr-only">
+                我是 Ryker，记录 AI、代理和带着判断力构建软件这件事。
+              </h1>
+              <div aria-hidden className="text-balance">
+                <HeroTitle
+                  words={[
+                    "我",
+                    "写",
+                    "AI、",
+                    "代理，",
+                    "也",
+                    "写",
+                    "把",
+                    "软件",
+                    "做得",
+                    "有判断。",
+                  ]}
+                  accentIndex={2}
+                />
+              </div>
             </div>
+          </Reveal>
+
+          <Reveal delay={100}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/avatar.png"
               alt="Ryker"
-              className="hidden h-32 w-32 shrink-0 rotate-3 rounded-2xl border border-hairline bg-paper-dim object-cover shadow-[0_20px_60px_-20px_rgba(28,25,22,0.25)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:rotate-0 hover:scale-105 sm:block lg:h-44 lg:w-44"
+              className="hidden h-32 w-32 justify-self-end rotate-3 rounded-2xl border border-hairline bg-paper-dim object-cover shadow-[0_20px_60px_-20px_rgba(28,25,22,0.25)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:rotate-0 hover:scale-105 lg:block lg:h-44 lg:w-44"
             />
-          </div>
-        </Reveal>
+          </Reveal>
+        </div>
 
         <Reveal delay={150}>
-          <div className="mt-8 flex flex-col gap-6 border-t border-hairline pt-6 sm:mt-12 sm:flex-row sm:items-end sm:justify-between sm:gap-8 sm:pt-8">
-            <p className="max-w-md text-base leading-relaxed text-ink-soft sm:text-lg">
+          <div className="mt-7 grid gap-6 border-t border-hairline pt-6 sm:mt-8 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:gap-8 lg:mt-10 lg:pt-7">
+            <p className="max-w-xl text-base leading-relaxed text-ink-soft sm:text-lg">
               关于提示词、代理系统和软件品味的文章与现场笔记，写在日常工作缝隙里。
             </p>
-            <div className="flex flex-wrap items-center gap-5">
-              <Link
-                href="#articles"
-                className="group inline-flex items-center gap-3 rounded-full bg-ink px-6 py-3 font-mono text-[10px] uppercase tracking-label text-paper transition-colors duration-300 hover:bg-accent sm:px-7 sm:py-3.5 sm:text-[11px]"
-              >
-                阅读文章
-                <span className="transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1">
-                  ↓
-                </span>
-              </Link>
-            </div>
+            <Link
+              href="#articles"
+              className="group inline-flex w-fit items-center gap-3 rounded-full bg-ink px-6 py-3 font-mono text-[10px] uppercase tracking-label text-paper transition-colors duration-300 hover:bg-accent sm:px-7 sm:py-3.5 sm:text-[11px]"
+            >
+              阅读文章
+              <span className="transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1">
+                ↓
+              </span>
+            </Link>
           </div>
         </Reveal>
 
         <Reveal delay={250}>
-          <dl className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3 font-mono text-[10px] uppercase tracking-label text-ink-soft sm:mt-10 sm:gap-x-8 sm:text-[11px]">
+          <dl className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 font-mono text-[10px] uppercase tracking-label text-ink-soft sm:mt-8 sm:gap-x-8 sm:text-[11px]">
             <div className="flex items-baseline gap-2">
               <dt className="font-serif text-xl font-light tabular-nums text-ink sm:text-2xl">
                 {totalPosts}
@@ -152,14 +144,17 @@ export default async function Home({
             </div>
           </dl>
         </Reveal>
+      </section>
 
-        <Reveal delay={350}>
-          <div className="mt-9 flex flex-col items-center gap-4 sm:mt-14 sm:gap-6">
+      {/* ── Home afterglow ───────────────────────────────────── */}
+      <Reveal delay={300}>
+        <section className="border-t border-hairline py-10 sm:py-12">
+          <div className="mx-auto flex max-w-3xl flex-col items-center gap-5">
             <RandomQuote />
             <SocialLinks />
           </div>
-        </Reveal>
-      </section>
+        </section>
+      </Reveal>
 
       {/* ── Recent writing timeline ──────────────────────────── */}
       <section className="border-t border-hairline py-14 sm:py-20">
@@ -241,14 +236,6 @@ export default async function Home({
           </div>
         </section>
       )}
-
-      <MarginaliaCabinet
-        artifacts={
-          thoughtArtifacts.length
-            ? [...thoughtArtifacts, ...sampleArtifacts]
-            : sampleArtifacts
-        }
-      />
 
       {/* ── All articles ─────────────────────────────────────── */}
       <section
