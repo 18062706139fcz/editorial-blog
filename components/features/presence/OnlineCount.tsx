@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { buildPresenceCopy } from "@/lib/living-site";
+import { buildPresenceCopy } from "@/lib/features/living-site";
 
 // A live "people reading right now" pill. Sends a heartbeat every 15s and
 // reads back the current online count from the in-memory presence endpoint.

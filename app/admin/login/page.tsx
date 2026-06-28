@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { isAuthenticated } from "@/lib/auth";
-import LoginForm from "@/components/LoginForm";
+import LoginForm from "@/components/features/admin/LoginForm";
 
 export const dynamic = "force-dynamic";
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Thought } from "@prisma/client";
-import { artifactKindLabel } from "@/lib/marginalia";
+import { artifactKindLabel } from "@/lib/features/marginalia";
 
 function formatDate(date: Date) {
   return new Intl.DateTimeFormat("zh-CN", {

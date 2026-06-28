@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import Logomark from "@/components/Logomark";
-import OnlineCount from "@/components/OnlineCount";
+import Logomark from "@/components/shared/Logomark";
+import OnlineCount from "@/components/features/presence/OnlineCount";
 
 const navItems = [
   { href: "/", label: "文章" },

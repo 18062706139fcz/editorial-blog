@@ -9,8 +9,8 @@ import {
   getThoughtModeLabel,
   getThoughtModes,
   type Artifact,
-} from "../lib/marginalia";
-import { normalizeThoughtInput, thoughtRecordToArtifact } from "../lib/thoughts";
+} from "../lib/features/marginalia";
+import { normalizeThoughtInput, thoughtRecordToArtifact } from "../lib/features/thoughts";
 
 const baseArtifact: Artifact = {
   id: "base",

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { isAuthenticated } from "@/lib/auth";
-import { normalizeThoughtInput } from "@/lib/thoughts";
+import { normalizeThoughtInput } from "@/lib/features/thoughts";
 
 export async function PUT(
   request: Request,

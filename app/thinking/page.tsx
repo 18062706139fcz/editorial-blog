@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Reveal from "@/components/Reveal";
+import Reveal from "@/components/shared/Reveal";
 import {
   artifactKindLabel,
   getThoughtModeLabel,
@@ -8,9 +8,9 @@ import {
   sampleArtifacts,
   type Artifact,
   type ThoughtMode,
-} from "@/lib/marginalia";
+} from "@/lib/features/marginalia";
 import { prisma } from "@/lib/db";
-import { thoughtRecordToArtifact } from "@/lib/thoughts";
+import { thoughtRecordToArtifact } from "@/lib/features/thoughts";
 
 export const dynamic = "force-dynamic";
 

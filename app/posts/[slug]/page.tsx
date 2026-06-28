@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import Reveal from "@/components/Reveal";
-import Markdown from "@/components/Markdown";
-import PostEasterEgg from "@/components/PostEasterEgg";
-import { formatDate, wordCountLabel, readingTime } from "@/lib/format";
+import Reveal from "@/components/shared/Reveal";
+import Markdown from "@/components/shared/Markdown";
+import PostEasterEgg from "@/components/features/posts/PostEasterEgg";
+import { formatDate, wordCountLabel, readingTime } from "@/lib/utils/format";
 
 export const dynamic = "force-dynamic";
 

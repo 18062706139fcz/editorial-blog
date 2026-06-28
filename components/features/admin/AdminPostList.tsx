@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Post } from "@prisma/client";
-import { formatDate } from "@/lib/format";
+import { formatDate } from "@/lib/utils/format";
 
 export default function AdminPostList({ posts }: { posts: Post[] }) {
   const router = useRouter();

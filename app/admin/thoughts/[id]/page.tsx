@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { isAuthenticated } from "@/lib/auth";
-import ThoughtEditor from "@/components/ThoughtEditor";
+import ThoughtEditor from "@/components/features/thoughts/ThoughtEditor";
 
 export const dynamic = "force-dynamic";
 

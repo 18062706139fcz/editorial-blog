@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Post } from "@prisma/client";
-import { formatDate } from "@/lib/format";
+import { formatDate } from "@/lib/utils/format";
 
 export default function PostCard({
   post,

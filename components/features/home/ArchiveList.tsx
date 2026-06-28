@@ -5,7 +5,7 @@ import {
   relativeTime,
   wordCountLabel,
   readingTime,
-} from "@/lib/format";
+} from "@/lib/utils/format";
 
 export default function ArchiveList({ posts }: { posts: Post[] }) {
   return (

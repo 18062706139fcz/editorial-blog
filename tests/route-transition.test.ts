@@ -3,7 +3,7 @@ import test from "node:test";
 import {
   routeTransitionKey,
   shouldStartRouteTransition,
-} from "../lib/route-transition";
+} from "../lib/utils/route-transition";
 
 test("routeTransitionKey ignores query-only changes", () => {
   assert.equal(routeTransitionKey("/thinking", "mode=note"), "/thinking");

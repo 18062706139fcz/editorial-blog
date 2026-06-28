@@ -4,44 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Thought } from "@prisma/client";
-
-const labelClass =
-  "mb-3 block font-mono text-[10px] uppercase tracking-label text-ink-soft";
-const inputClass =
-  "w-full border-0 border-b border-hairline bg-transparent pb-2 font-serif text-base text-ink placeholder:text-ink-soft/50 focus:border-ink focus:outline-none sm:text-lg";
-
-const kindOptions = [
-  { value: "Observation", label: "随想", thread: "随想" },
-  { value: "Question", label: "提问", thread: "提问" },
-  { value: "Quote", label: "摘录", thread: "摘录" },
-  { value: "Prompt", label: "提示词", thread: "提示词" },
-  { value: "Rubric", label: "清单 / 工具", thread: "工具" },
-  { value: "Link", label: "对象 / 链接", thread: "对象" },
-];
-
-const toneOptions = [
-  { value: "Paper", label: "纸面" },
-  { value: "Ink", label: "黑墨" },
-  { value: "Ember", label: "橙色" },
-  { value: "Blueprint", label: "蓝图" },
-];
-
-const sizeOptions = [
-  { value: "Small", label: "小卡" },
-  { value: "Wide", label: "宽卡" },
-  { value: "Tall", label: "长卡" },
-  { value: "Feature", label: "主卡" },
-];
-
-function listToText(value?: string | null) {
-  if (!value) return "";
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed.join("\n") : "";
-  } catch {
-    return "";
-  }
-}
+import { kindOptions, sizeOptions, toneOptions } from "./options";
+import { inputClass, labelClass, listToText } from "./form-utils";
 
 export default function ThoughtEditor({ thought }: { thought?: Thought }) {
   const router = useRouter();

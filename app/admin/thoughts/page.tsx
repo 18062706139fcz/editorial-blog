@@ -2,8 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { isAuthenticated } from "@/lib/auth";
-import AdminThoughtList from "@/components/AdminThoughtList";
-import LogoutButton from "@/components/LogoutButton";
+import AdminThoughtList from "@/components/features/admin/AdminThoughtList";
+import LogoutButton from "@/components/features/admin/LogoutButton";
 
 export const dynamic = "force-dynamic";
 

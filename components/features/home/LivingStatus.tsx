@@ -1,5 +1,5 @@
-import StatusBar from "@/components/StatusBar";
-import { getVisibleStatusItems, TODAY_STATUS_ITEMS } from "@/lib/living-site";
+import StatusBar from "@/components/layout/StatusBar";
+import { getVisibleStatusItems, TODAY_STATUS_ITEMS } from "@/lib/features/living-site";
 
 export default function LivingStatus() {
   const items = getVisibleStatusItems(TODAY_STATUS_ITEMS);

@@ -3,7 +3,7 @@ import type {
   ArtifactKind,
   ArtifactSize,
   ArtifactTone,
-} from "@/lib/marginalia";
+} from "@/lib/features/marginalia";
 
 export type ThoughtRecord = {
   id: number;

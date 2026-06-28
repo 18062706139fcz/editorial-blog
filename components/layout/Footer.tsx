@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import Logomark from "@/components/Logomark";
+import Logomark from "@/components/shared/Logomark";
 
 const GITHUB_URL = "https://github.com/ryker";
 

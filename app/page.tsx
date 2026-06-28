@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import Archive from "@/components/Archive";
-import Timeline from "@/components/Timeline";
-import RandomQuote from "@/components/RandomQuote";
-import SocialLinks from "@/components/SocialLinks";
-import LivingStatus from "@/components/LivingStatus";
-import Reveal from "@/components/Reveal";
-import HeroTitle from "@/components/HeroTitle";
-import FeaturedArt from "@/components/FeaturedArt";
-import { formatDate, countWords } from "@/lib/format";
+import Archive from "@/components/features/home/Archive";
+import Timeline from "@/components/features/home/Timeline";
+import RandomQuote from "@/components/shared/RandomQuote";
+import SocialLinks from "@/components/shared/SocialLinks";
+import LivingStatus from "@/components/features/home/LivingStatus";
+import Reveal from "@/components/shared/Reveal";
+import HeroTitle from "@/components/features/home/HeroTitle";
+import FeaturedArt from "@/components/features/home/FeaturedArt";
+import { formatDate, countWords } from "@/lib/utils/format";
 
 export const dynamic = "force-dynamic";
 

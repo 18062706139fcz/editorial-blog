@@ -28,7 +28,7 @@ test("home quote and social links are not nested inside the hero section", () =>
 });
 
 test("weather status uses a custom permission entry before browser geolocation", () => {
-  const statusBar = source("../components/StatusBar.tsx");
+  const statusBar = source("../components/layout/StatusBar.tsx");
 
   assert.match(statusBar, /permission/);
   assert.match(statusBar, /onRequestLocation/);

@@ -1,281 +1,22 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { CSSProperties } from "react";
 import { useRouter } from "next/navigation";
-import type { HiddenRoom } from "@/lib/hidden-rooms";
-
-type NightStyle = CSSProperties & {
-  "--night-accent": string;
-  "--night-accent-soft": string;
-  "--night-accent-tail": string;
-};
-
-type RangeStyle = CSSProperties & {
-  "--progress": string;
-};
-
-type LyricRailStyle = CSSProperties & {
-  "--current-lyric-index": number;
-};
-
-type TrackSource = {
-  url: string;
-  fee: number;
-  durationMs: number;
-  type: string | null;
-};
-
-type HotComment = {
-  content: string;
-  likedCount: number;
-  nickname: string;
-};
-
-type LyricWord = {
-  time: number;
-  duration: number;
-  text: string;
-};
-
-type LyricLine = {
-  time: number;
-  text: string;
-  words?: LyricWord[];
-};
-
-const specialLyricTerms = [
-  "含笑半步癫",
-  "桃木降妖剑",
-  "长生殿",
-  "尾生约",
-  "睡梦罗汉拳",
-];
-
-const tracks = [
-  {
-    title: "奇妙能力歌",
-    artist: "陈粒",
-    bpm: "72 bpm",
-    duration: "04:13",
-    durationSeconds: 253,
-    neteaseId: "29357047",
-    coverUrl:
-      "https://p2.music.126.net/VuJFMbXzpAProbJPoXLv7g==/7721870161993398.jpg",
-    accent: "#bba6ba",
-    accentSoft: "rgba(187, 166, 186, 0.16)",
-    accentTail: "#dfccd8",
-    note: "网易云可免费播放的陈粒曲目，走真实音频源。",
-  },
-  {
-    title: "正趣果上果",
-    artist: "陈粒",
-    bpm: "76 bpm",
-    duration: "03:42",
-    durationSeconds: 222,
-    neteaseId: "30431370",
-    coverUrl:
-      "https://p2.music.126.net/VuJFMbXzpAProbJPoXLv7g==/7721870161993398.jpg",
-    accent: "#c7a487",
-    accentSoft: "rgba(199, 164, 135, 0.16)",
-    accentTail: "#e0c4a8",
-    note: "来自《如也》的《正趣果上果》，用当前可用音频 URL 播放。",
-  },
-  {
-    title: "种种",
-    artist: "陈粒",
-    bpm: "64 bpm",
-    duration: "03:11",
-    durationSeconds: 191,
-    neteaseId: "2749429518",
-    coverUrl:
-      "https://p1.music.126.net/jeWHIkiTkBglJKxte7p6JA==/109951172059186762.jpg",
-    accent: "#9fb1b8",
-    accentSoft: "rgba(159, 177, 184, 0.16)",
-    accentTail: "#c6d2d6",
-    note: "使用《十年自选》里的可播放版本。",
-  },
-];
-
-function formatTime(value: number) {
-  if (!Number.isFinite(value) || value <= 0) return "0:00";
-  const minutes = Math.floor(value / 60);
-  const seconds = Math.floor(value % 60);
-  return `${minutes}:${String(seconds).padStart(2, "0")}`;
-}
-
-function selectLyricIndex(lines: LyricLine[], time: number) {
-  if (lines.length === 0) return -1;
-
-  let selected = 0;
-  for (let index = 0; index < lines.length; index += 1) {
-    if (time + 0.2 >= lines[index].time) selected = index;
-  }
-  return selected;
-}
-
-function LyricIdleDoodle({ copy }: { copy: string }) {
-  return (
-    <div
-      data-lyric-idle
-      className="mt-3 min-h-[7.25rem] px-1 py-2"
-    >
-      <div className="relative h-16 overflow-hidden rounded-[6px] bg-[radial-gradient(circle_at_35%_45%,var(--night-accent-soft),transparent_58%)] text-[var(--night-accent-tail)]">
-        <svg
-          aria-hidden
-          viewBox="0 0 220 72"
-          className="absolute inset-0 h-full w-full opacity-60"
-        >
-          <path
-            d="M19 45 C48 15 76 59 105 31 S160 24 198 51"
-            fill="none"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeWidth="1.2"
-            strokeDasharray="4 8"
-          />
-          <circle cx="183" cy="23" r="10" fill="none" stroke="currentColor" />
-          <path
-            d="M65 51 L82 19 L94 49 M77 36 H90"
-            fill="none"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeWidth="1.4"
-          />
-        </svg>
-        <span className="absolute left-5 top-4 font-serif text-2xl text-white/62">
-          沙
-        </span>
-        <span className="absolute left-[48%] top-7 font-mono text-[10px] uppercase tracking-label text-white/32">
-          wind / lamp / echo
-        </span>
-        <span className="absolute bottom-3 right-6 font-serif text-xl text-white/52">
-          月
-        </span>
-      </div>
-      <p className="mt-3 text-sm leading-6 text-white/46">{copy}</p>
-    </div>
-  );
-}
-
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function renderLyricPieces(text: string) {
-  const specialPattern = new RegExp(
-    `(${specialLyricTerms.map(escapeRegExp).join("|")})`,
-    "g",
-  );
-
-  return text.split(/(【[^】]+】)/g).flatMap((part, index) => {
-    if (!part) return null;
-    if (/^【[^】]+】$/.test(part)) {
-      return (
-        <span
-          key={`${part}-${index}`}
-          className="lyric-token lyric-token--bracket"
-        >
-          {part.slice(1, -1)}
-        </span>
-      );
-    }
-    return part.split(specialPattern).map((segment, segmentIndex) => {
-      if (!segment) return null;
-      if (specialLyricTerms.includes(segment)) {
-        return (
-          <span
-            key={`${segment}-${index}-${segmentIndex}`}
-            className="lyric-token lyric-token--literary"
-          >
-            {segment}
-          </span>
-        );
-      }
-      return <span key={`${segment}-${index}-${segmentIndex}`}>{segment}</span>;
-    });
-  });
-}
-
-function TimedLyricLine({
-  currentTime,
-  line,
-}: {
-  currentTime: number;
-  line: LyricLine;
-}) {
-  if (!line.words?.length) {
-    return <span>{renderLyricPieces(line.text)}</span>;
-  }
-
-  return (
-    <span
-      aria-label={line.text}
-      className="karaoke-line karaoke-line--timed"
-    >
-      {line.words.map((word, index) => {
-        const wordStart = word.time;
-        const wordEnd = word.time + Math.max(0.05, word.duration);
-        const isSung = currentTime >= wordEnd;
-        const isActive = currentTime >= wordStart && currentTime < wordEnd;
-
-        return (
-          <span
-            aria-hidden
-            key={`${word.time}-${word.text}-${index}`}
-            className={`lyric-word ${isSung ? "is-sung" : ""} ${
-              isActive ? "is-active" : ""
-            }`}
-          >
-            {word.text}
-          </span>
-        );
-      })}
-    </span>
-  );
-}
-
-function LyricDisplay({
-  currentIndex,
-  currentTime,
-  lines,
-}: {
-  currentIndex: number;
-  currentTime: number;
-  lines: LyricLine[];
-}) {
-  return (
-    <div className="lyric-viewport mt-3 h-[12rem] overflow-hidden">
-      <div
-        className="lyric-rail"
-        style={
-          {
-            "--current-lyric-index": currentIndex,
-          } as LyricRailStyle
-        }
-      >
-        {lines.map((line, index) => {
-          const isCurrent = index === currentIndex;
-          const distance = Math.abs(index - currentIndex);
-          return (
-            <p
-              key={`${line.time}-${line.text}`}
-              className={`lyric-row ${
-                isCurrent ? "is-current" : distance <= 1 ? "is-near" : ""
-              }`}
-            >
-              {isCurrent ? (
-                <TimedLyricLine currentTime={currentTime} line={line} />
-              ) : (
-                <span>{renderLyricPieces(line.text)}</span>
-              )}
-            </p>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
+import type { HiddenRoom } from "@/lib/features/hidden-rooms";
+import { LyricDisplay, LyricIdleDoodle } from "./LyricDisplay";
+import {
+  formatTime,
+  getLyricLineProgress,
+  selectLyricIndex,
+} from "./helpers";
+import { tracks } from "./tracks";
+import type {
+  HotComment,
+  LyricLine,
+  NightStyle,
+  RangeStyle,
+  TrackSource,
+} from "./types";
 
 export default function NightRadio({ room }: { room: HiddenRoom }) {
   const router = useRouter();
@@ -305,6 +46,9 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
   const currentLyricIndex =
     hasPlaybackPosition && lyrics.length > 0 ? selectLyricIndex(lyrics, currentTime) : -1;
   const currentLyric = currentLyricIndex >= 0 ? lyrics[currentLyricIndex] : null;
+  const lyricLineProgress = currentLyric
+    ? getLyricLineProgress(lyrics, currentLyricIndex, currentTime, duration)
+    : 0;
   const lyricEmptyCopy = lyricError
     ? lyricError
     : loadingLyrics
@@ -408,6 +152,20 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
     };
   }, [activeTrack.durationSeconds, activeTrack.neteaseId]);
 
+  useEffect(() => {
+    if (!playing) return;
+
+    let frameId = 0;
+    const syncAudioClock = () => {
+      const audio = audioRef.current;
+      if (audio) setCurrentTime(audio.currentTime);
+      frameId = window.requestAnimationFrame(syncAudioClock);
+    };
+
+    frameId = window.requestAnimationFrame(syncAudioClock);
+    return () => window.cancelAnimationFrame(frameId);
+  }, [playing]);
+
   async function togglePlayback() {
     if (!audioRef.current || !source || loadingSource) return;
     setPlaybackError("");
@@ -493,7 +251,7 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
               </div>
             </div>
 
-            <div className="relative min-w-0 rounded-[8px] border border-white/10 bg-[linear-gradient(145deg,#1b1719_0%,#0b0b0d_100%)] px-5 py-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+            <div className="relative min-w-0 rounded-[8px] bg-[linear-gradient(145deg,#1b1719_0%,#0b0b0d_100%)] px-5 py-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
               <div
                 data-turntable
                 className="relative mx-auto aspect-square w-full max-w-[31rem]"
@@ -617,6 +375,7 @@ export default function NightRadio({ room }: { room: HiddenRoom }) {
                 <LyricDisplay
                   currentTime={currentTime}
                   currentIndex={currentLyricIndex}
+                  lineProgress={lyricLineProgress}
                   lines={lyrics}
                 />
               ) : (

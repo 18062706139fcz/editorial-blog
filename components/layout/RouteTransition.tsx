@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   routeTransitionKey,
   shouldStartRouteTransition,
-} from "@/lib/route-transition";
+} from "@/lib/utils/route-transition";
 
 export default function RouteTransition({
   children,

@@ -5,7 +5,7 @@ import {
   HITOKOTO_ENDPOINT,
   normalizeHitokotoQuote,
   type Quote,
-} from "@/lib/living-site";
+} from "@/lib/features/living-site";
 
 export default function RandomQuote() {
   const [quote, setQuote] = useState<Quote | null>(null);

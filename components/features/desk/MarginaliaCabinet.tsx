@@ -1,12 +1,12 @@
 import Link from "next/link";
-import Reveal from "@/components/Reveal";
+import Reveal from "@/components/shared/Reveal";
 import {
   artifactKindLabel,
   artifactSizeClass,
   getCabinetArtifacts,
   sampleArtifacts,
   type Artifact,
-} from "@/lib/marginalia";
+} from "@/lib/features/marginalia";
 
 const toneClasses: Record<Artifact["tone"], string> = {
   Paper:

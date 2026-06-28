@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import DeskRoom from "@/components/DeskRoom";
-import { getHiddenRoom } from "@/lib/hidden-rooms";
+import DeskRoom from "@/components/features/desk/DeskRoom";
+import { getHiddenRoom } from "@/lib/features/hidden-rooms";
 
 const room = getHiddenRoom("desk");
 

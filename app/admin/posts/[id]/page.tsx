@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { isAuthenticated } from "@/lib/auth";
-import PostEditor from "@/components/PostEditor";
+import PostEditor from "@/components/features/posts/PostEditor";
 
 export const dynamic = "force-dynamic";
 

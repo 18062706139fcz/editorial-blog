@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import NightRadio from "@/components/NightRadio";
-import { getHiddenRoom } from "@/lib/hidden-rooms";
+import NightRadio from "@/components/features/night/NightRadio";
+import { getHiddenRoom } from "@/lib/features/hidden-rooms";
 
 const room = getHiddenRoom("night");
 

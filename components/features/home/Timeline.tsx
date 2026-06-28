@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { Post } from "@prisma/client";
-import { relativeTime, wordCountLabel } from "@/lib/format";
-import Reveal from "@/components/Reveal";
+import { relativeTime, wordCountLabel } from "@/lib/utils/format";
+import Reveal from "@/components/shared/Reveal";
 
 export default function Timeline({ posts }: { posts: Post[] }) {
   return (

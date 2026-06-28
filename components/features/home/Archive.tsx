@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Post } from "@prisma/client";
-import ArchiveList from "@/components/ArchiveList";
+import ArchiveList from "@/components/features/home/ArchiveList";
 
 const CATEGORIES = ["全部", "提示词", "随笔", "现场"];
 

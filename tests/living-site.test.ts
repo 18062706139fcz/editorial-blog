@@ -7,7 +7,7 @@ import {
   normalizeHitokotoQuote,
   selectPostEasterEgg,
   type StatusItem,
-} from "../lib/living-site";
+} from "../lib/features/living-site";
 import { readFileSync } from "node:fs";
 
 test("getVisibleStatusItems still filters supplied items but exposes no manual homepage statuses by default", () => {

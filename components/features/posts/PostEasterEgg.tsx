@@ -1,4 +1,4 @@
-import { selectPostEasterEgg } from "@/lib/living-site";
+import { selectPostEasterEgg } from "@/lib/features/living-site";
 
 export default function PostEasterEgg({ slug }: { slug: string }) {
   const egg = selectPostEasterEgg(slug);

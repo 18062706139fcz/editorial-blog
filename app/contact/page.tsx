@@ -1,4 +1,4 @@
-import ContactForm from "@/components/ContactForm";
+import ContactForm from "@/components/features/contact/ContactForm";
 
 export const metadata = {
   title: "联系 — Ryker",

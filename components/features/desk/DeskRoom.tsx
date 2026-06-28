@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { HiddenRoom } from "@/lib/hidden-rooms";
+import type { HiddenRoom } from "@/lib/features/hidden-rooms";
 
 const deskObjects = [
   {

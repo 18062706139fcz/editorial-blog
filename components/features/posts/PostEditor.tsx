@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import type { Post } from "@prisma/client";
-import Markdown from "@/components/Markdown";
+import Markdown from "@/components/shared/Markdown";
 
 const labelClass =
   "mb-3 block font-mono text-[10px] uppercase tracking-label text-ink-soft";

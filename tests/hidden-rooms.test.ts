@@ -7,7 +7,25 @@ const hiddenRoutes = ["lost", "night", "desk"] as const;
 function source(path: string) {
   const url = new URL(path, import.meta.url);
   assert.equal(existsSync(url), true, `${path} should exist`);
-  return readFileSync(url, "utf8");
+  const text = readFileSync(url, "utf8");
+  if (path.endsWith(".css")) {
+    return text.replace(/@import\s+"([^"]+)";?/g, (_, rel) => {
+      const importedUrl = new URL(rel, url);
+      return existsSync(importedUrl) ? readFileSync(importedUrl, "utf8") : "";
+    });
+  }
+  if (path.endsWith(".tsx") || path.endsWith(".ts")) {
+    return text.replace(/from\s+"(\.\/[^"]+)"/g, (match, rel) => {
+      for (const ext of [".tsx", ".ts", "/index.tsx", "/index.ts"]) {
+        const candidate = new URL(rel + ext, url);
+        if (existsSync(candidate)) {
+          return `${match}\n/* inlined */ ${readFileSync(candidate, "utf8")}`;
+        }
+      }
+      return match;
+    });
+  }
+  return text;
 }
 
 test("hidden room routes exist and opt out of indexing", () => {
@@ -27,18 +45,18 @@ test("lost remains a quiet hidden room while night and desk use dedicated experi
   assert.match(source("../app/desk/page.tsx"), /DeskRoom/);
 
   assert.equal(
-    source("../app/night/page.tsx").includes('from "@/components/HiddenRoom"'),
+    source("../app/night/page.tsx").includes('from "@/components/features/hidden/HiddenRoom"'),
     false,
   );
   assert.equal(
-    source("../app/desk/page.tsx").includes('from "@/components/HiddenRoom"'),
+    source("../app/desk/page.tsx").includes('from "@/components/features/hidden/HiddenRoom"'),
     false,
   );
 });
 
 test("hidden rooms are not exposed through visible navigation surfaces", () => {
-  const nav = source("../components/Nav.tsx");
-  const footer = source("../components/Footer.tsx");
+  const nav = source("../components/layout/Nav.tsx");
+  const footer = source("../components/layout/Footer.tsx");
 
   for (const route of hiddenRoutes) {
     assert.equal(nav.includes(`href="/${route}"`), false);
@@ -47,14 +65,14 @@ test("hidden rooms are not exposed through visible navigation surfaces", () => {
 });
 
 test("visible nav does not default unknown hidden routes to the articles tab", () => {
-  const nav = source("../components/Nav.tsx");
+  const nav = source("../components/layout/Nav.tsx");
 
   assert.equal(nav.includes("activeIndex < 0 ? 0 : activeIndex"), false);
   assert.match(nav, /activeIndex\s*>=\s*0/);
 });
 
 test("hidden room content is centralized in shared configuration", () => {
-  const config = source("../lib/hidden-rooms.ts");
+  const config = source("../lib/features/hidden-rooms.ts");
 
   for (const route of hiddenRoutes) {
     assert.match(config, new RegExp(`slug:\\s*"${route}"`));
@@ -66,8 +84,8 @@ test("hidden room content is centralized in shared configuration", () => {
 });
 
 test("night radio uses a full-bleed dark stage with Chen Li tracks", () => {
-  const nightRadio = source("../components/NightRadio.tsx");
-  const config = source("../lib/hidden-rooms.ts");
+  const nightRadio = source("../components/features/night/NightRadio.tsx");
+  const config = source("../lib/features/hidden-rooms.ts");
 
   assert.match(nightRadio, /w-screen/);
   assert.match(nightRadio, /-translate-x-1\/2/);
@@ -83,7 +101,7 @@ test("night radio uses a full-bleed dark stage with Chen Li tracks", () => {
 });
 
 test("night radio uses real Chen Li music embeds instead of synthetic noise", () => {
-  const nightRadio = source("../components/NightRadio.tsx");
+  const nightRadio = source("../components/features/night/NightRadio.tsx");
 
   assert.match(nightRadio, /\/api\/music\/netease-url/);
   assert.match(nightRadio, /\/api\/music\/netease-lyric/);
@@ -99,7 +117,7 @@ test("night radio uses real Chen Li music embeds instead of synthetic noise", ()
 });
 
 test("night radio record and play control have motion-oriented styling", () => {
-  const nightRadio = source("../components/NightRadio.tsx");
+  const nightRadio = source("../components/features/night/NightRadio.tsx");
 
   assert.match(nightRadio, /recordNeedle/);
   assert.match(nightRadio, /recordGlow/);
@@ -109,8 +127,15 @@ test("night radio record and play control have motion-oriented styling", () => {
   assert.match(nightRadio, /data-lyric-panel/);
   assert.match(nightRadio, /data-lyric-idle/);
   assert.match(nightRadio, /currentLyric/);
+  assert.match(nightRadio, /getLyricLineProgress/);
+  assert.match(nightRadio, /lyricLineProgress/);
+  assert.match(nightRadio, /requestAnimationFrame/);
   assert.match(nightRadio, /TimedLyricLine/);
   assert.match(nightRadio, /karaoke-line/);
+  assert.match(nightRadio, /lineProgress/);
+  assert.match(nightRadio, /lyric-line-progress/);
+  assert.match(nightRadio, /karaoke-line__active/);
+  assert.match(nightRadio, /clipPath/);
   assert.match(nightRadio, /lyric-word/);
   assert.match(nightRadio, /lyric-rail/);
   assert.match(nightRadio, /lyric-row/);
@@ -136,14 +161,17 @@ test("night radio record and play control have motion-oriented styling", () => {
   assert.equal(nightRadio.includes("min-w-28"), false);
   assert.equal(nightRadio.includes("currentLyricProgress"), false);
   assert.equal(nightRadio.includes("karaoke-line__fill"), false);
+  assert.equal(nightRadio.includes("time + 0.2"), false);
   assert.match(nightRadio, /aria-label=\{playing \? "暂停夜间音乐台" : "播放夜间音乐台"\}/);
 });
 
 test("night radio progress is driven by the real audio element", () => {
-  const nightRadio = source("../components/NightRadio.tsx");
+  const nightRadio = source("../components/features/night/NightRadio.tsx");
 
   assert.equal(nightRadio.includes("setInterval"), false);
   assert.match(nightRadio, /onTimeUpdate/);
+  assert.match(nightRadio, /requestAnimationFrame/);
+  assert.match(nightRadio, /cancelAnimationFrame/);
   assert.match(nightRadio, /currentTime/);
   assert.match(nightRadio, /duration/);
   assert.match(nightRadio, /type="range"/);
@@ -152,13 +180,18 @@ test("night radio progress is driven by the real audio element", () => {
 });
 
 test("night radio uses quieter palette variables and no decorative signal panel", () => {
-  const nightRadio = source("../components/NightRadio.tsx");
-  const globals = source("../app/globals.css");
+  const nightRadio = source("../components/features/night/NightRadio.tsx");
+  const globals = source("../app/styles/night-radio.css");
+  const keyframes = source("../app/styles/keyframes.css");
 
   assert.match(nightRadio, /--night-accent/);
   assert.match(nightRadio, /accentSoft/);
   assert.match(globals, /var\(--night-accent\)/);
   assert.match(globals, /night-range:focus/);
+  assert.match(globals, /lyric-line-progress/);
+  assert.match(globals, /karaoke-line--line-progress/);
+  assert.match(globals, /karaoke-line__active/);
+  assert.match(globals, /will-change:\s*clip-path/);
   assert.match(globals, /lyric-rail/);
   assert.match(globals, /--lyric-row-height:\s*4rem/);
   assert.match(globals, /height:\s*calc\(var\(--lyric-row-height\) \* 3\)/);
@@ -168,7 +201,7 @@ test("night radio uses quieter palette variables and no decorative signal panel"
   assert.match(globals, /lyric-word/);
   assert.match(globals, /is-active/);
   assert.match(globals, /hot-comment-text/);
-  assert.match(globals, /lights-out/);
+  assert.match(keyframes, /lights-out/);
   assert.match(globals, /karaoke-line/);
   assert.equal(nightRadio.includes("#dd3f35"), false);
   assert.equal(globals.includes("#dd3f35"), false);
@@ -217,8 +250,8 @@ test("netease comments API returns hot comments for approved Chen Li tracks", ()
 
 test("night route opts the global chrome into a dark surface", () => {
   const layout = source("../app/layout.tsx");
-  const nav = source("../components/Nav.tsx");
-  const routeTheme = source("../components/RouteTheme.tsx");
+  const nav = source("../components/layout/Nav.tsx");
+  const routeTheme = source("../components/layout/RouteTheme.tsx");
   const globals = source("../app/globals.css");
 
   assert.match(layout, /RouteTheme/);

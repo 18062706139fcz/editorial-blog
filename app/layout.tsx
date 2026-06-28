@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { Fraunces, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-import Nav from "@/components/Nav";
-import Footer from "@/components/Footer";
-import RouteTransition from "@/components/RouteTransition";
-import ReadingProgress from "@/components/ReadingProgress";
-import RouteTheme from "@/components/RouteTheme";
+import Nav from "@/components/layout/Nav";
+import Footer from "@/components/layout/Footer";
+import RouteTransition from "@/components/layout/RouteTransition";
+import ReadingProgress from "@/components/layout/ReadingProgress";
+import RouteTheme from "@/components/layout/RouteTheme";
 
 const serif = Fraunces({
   subsets: ["latin"],
