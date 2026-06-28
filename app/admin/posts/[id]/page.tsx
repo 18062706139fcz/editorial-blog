@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { isAuthenticated } from "@/lib/auth";
-import PostEditor from "@/components/PostEditor";
+import PostEditor from "@/components/features/posts/PostEditor";
 
 export const dynamic = "force-dynamic";
 
@@ -20,10 +20,10 @@ export default async function EditPostPage({
   return (
     <div className="py-10 sm:py-16">
       <p className="mb-2 font-mono text-[11px] uppercase tracking-label text-ink-soft">
-        Editor
+        后台
       </p>
       <h1 className="mb-9 font-serif text-[2rem] text-ink sm:mb-12 sm:text-4xl">
-        Edit post
+        编辑文章
       </h1>
       <PostEditor post={post} />
     </div>

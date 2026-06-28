@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import Reveal from "@/components/Reveal";
-import Markdown from "@/components/Markdown";
-import { formatDate, wordCountLabel, readingTime } from "@/lib/format";
+import Reveal from "@/components/shared/Reveal";
+import Markdown from "@/components/shared/Markdown";
+import PostEasterEgg from "@/components/features/posts/PostEasterEgg";
+import { formatDate, wordCountLabel, readingTime } from "@/lib/utils/format";
 
 export const dynamic = "force-dynamic";
 
@@ -27,14 +28,13 @@ export default async function PostPage({
     })
     .then((r) => r.views)
     .catch(() => post.views);
-
   return (
     <article className="py-10 sm:py-16">
       <Link
         href="/"
         className="font-mono text-[10px] uppercase tracking-label text-ink-soft underline-offset-4 transition-colors hover:text-accent hover:underline sm:text-[11px]"
       >
-        ← Back to all articles
+        ← 返回全部文章
       </Link>
 
       <Reveal className="mx-auto mt-9 max-w-3xl text-left sm:mt-12 sm:text-center">
@@ -45,7 +45,7 @@ export default async function PostPage({
           {post.title}
         </h1>
         <p className="mt-6 flex flex-wrap gap-x-2.5 gap-y-1 font-mono text-[10px] uppercase tracking-label text-ink-soft sm:mt-7 sm:block sm:text-[11px]">
-          {post.author} · {formatDate(post.createdAt)} · {wordCountLabel(post.content)} · {readingTime(post.content)} min read · {views.toLocaleString()} views
+          {post.author} · {formatDate(post.createdAt)} · {wordCountLabel(post.content)} · {readingTime(post.content)} 分钟 · {views.toLocaleString()} 次阅读
         </p>
       </Reveal>
 
@@ -53,14 +53,18 @@ export default async function PostPage({
         <Markdown content={post.content} />
       </div>
 
-      <div className="mx-auto mt-12 max-w-2xl border-t border-hairline pt-8 text-center sm:mt-16 sm:pt-10">
+      <div className="mx-auto mt-12 max-w-2xl sm:mt-16">
+        <PostEasterEgg slug={post.slug} />
+      </div>
+
+      <div className="mx-auto mt-12 flex max-w-2xl justify-center border-t border-hairline pt-8 text-center sm:mt-16 sm:pt-10">
         <a
           href="https://github.com/ryker"
           target="_blank"
           rel="noreferrer"
           className="inline-block rounded-full bg-ink px-6 py-3 font-mono text-[10px] uppercase tracking-label text-paper transition-colors hover:bg-accent sm:px-7 sm:py-3.5 sm:text-[11px]"
         >
-          Follow on GitHub →
+          去 GitHub 看看 →
         </a>
       </div>
     </article>

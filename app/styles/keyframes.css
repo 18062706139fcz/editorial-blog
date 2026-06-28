@@ -1,0 +1,40 @@
+@keyframes record-sheen {
+  0%,
+  42% {
+    opacity: 0;
+    transform: rotate(0deg);
+  }
+  58% {
+    opacity: 0.42;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes lights-out {
+  0% {
+    opacity: 0;
+    clip-path: circle(0% at 50% 44%);
+  }
+  42% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 1;
+    clip-path: circle(150% at 50% 44%);
+  }
+}
+
+@keyframes album-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 12px 32px -22px rgba(0, 0, 0, 1);
+  }
+  50% {
+    transform: scale(1.035);
+    box-shadow: 0 16px 44px -24px rgba(187, 166, 186, 0.7);
+  }
+}

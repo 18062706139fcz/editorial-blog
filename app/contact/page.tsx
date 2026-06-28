@@ -1,7 +1,7 @@
-import ContactForm from "@/components/ContactForm";
+import ContactForm from "@/components/features/contact/ContactForm";
 
 export const metadata = {
-  title: "Get in touch — The Margin",
+  title: "联系 — Ryker",
 };
 
 export default function ContactPage() {
@@ -10,14 +10,14 @@ export default function ContactPage() {
       {/* Left column */}
       <section className="border-b border-hairline px-8 py-16 md:border-b-0 md:border-r md:py-24">
         <h1 className="font-serif text-5xl font-light leading-[1.02] tracking-tight text-ink sm:text-6xl">
-          Let&apos;s get
+          写点
           <br />
-          <span className="italic text-accent">in touch</span>
+          <span className="italic text-accent">什么</span>
         </h1>
         <div className="mt-12">
-          <p className="font-serif text-lg text-ink">Prefer to write?</p>
+          <p className="font-serif text-lg text-ink">更喜欢邮件？</p>
           <p className="mt-1 text-ink-soft">
-            Reach the editor directly at:
+            可以直接写到这里：
           </p>
           <a
             href="mailto:hello@themargin.blog"
@@ -27,7 +27,7 @@ export default function ContactPage() {
           </a>
         </div>
         <p className="mt-20 font-mono text-[11px] uppercase tracking-label text-ink-soft">
-          Read by curious people like you
+          给同样好奇的人读
         </p>
       </section>
 

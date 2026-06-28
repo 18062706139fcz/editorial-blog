@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { prisma } from "@/lib/db";
-import Archive from "@/components/Archive";
-import Timeline from "@/components/Timeline";
-import RandomQuote from "@/components/RandomQuote";
-import SocialLinks from "@/components/SocialLinks";
-import StatusBar from "@/components/StatusBar";
-import Reveal from "@/components/Reveal";
-import HeroTitle from "@/components/HeroTitle";
-import FeaturedArt from "@/components/FeaturedArt";
-import { formatDate, countWords } from "@/lib/format";
+import Archive from "@/components/features/home/Archive";
+import Timeline from "@/components/features/home/Timeline";
+import RandomQuote from "@/components/shared/RandomQuote";
+import SocialLinks from "@/components/shared/SocialLinks";
+import LivingStatus from "@/components/features/home/LivingStatus";
+import Reveal from "@/components/shared/Reveal";
+import HeroTitle from "@/components/features/home/HeroTitle";
+import FeaturedArt from "@/components/features/home/FeaturedArt";
+import { formatDate, countWords } from "@/lib/utils/format";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +17,7 @@ export default async function Home({
 }: {
   searchParams: { category?: string };
 }) {
-  const initialCategory = searchParams.category ?? "All";
+  const initialCategory = searchParams.category ?? "全部";
 
   const featured = await prisma.post.findMany({
     where: { published: true, featured: true },
@@ -33,7 +33,7 @@ export default async function Home({
   const lead = featured[0];
   const rest = featured.slice(1);
 
-  // Hero stats — borrowed from innei.in "N 篇 · N 万字 · N 天"
+  // Hero stats, in the familiar "N 篇 · N 万字 · N 天" shape.
   const allPosts = await prisma.post.findMany({
     where: { published: true },
     select: { content: true, createdAt: true },
@@ -53,7 +53,7 @@ export default async function Home({
     Math.round((Date.now() - new Date(firstDate).getTime()) / 86400000),
   );
 
-  // Recent posts for the innei-style timeline
+  // Recent posts for the top timeline.
   const recent = await prisma.post.findMany({
     where: { published: true },
     orderBy: { createdAt: "desc" },
@@ -63,69 +63,65 @@ export default async function Home({
   return (
     <div className="pb-4">
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <section className="flex min-h-[calc(100svh-4rem)] flex-col justify-center py-12 sm:min-h-screen sm:py-20">
-        <Reveal>
-          <div className="mb-6 flex flex-wrap items-center gap-x-5 gap-y-3 sm:mb-8">
-            <StatusBar />
-          </div>
-          <h1 className="sr-only">
-            Hi, I’m Ryker. I write about AI and the craft of building software
-            with taste.
-          </h1>
-          <div className="flex items-center justify-between gap-8">
-            <div aria-hidden className="text-balance">
-              <HeroTitle
-                words={[
-                  "Hi,",
-                  "I’m",
-                  "Ryker —",
-                  "I",
-                  "write",
-                  "about",
-                  "AI",
-                  "and",
-                  "the",
-                  "craft",
-                  "of",
-                  "building",
-                  "software",
-                  "with",
-                  "taste.",
-                ]}
-                accentIndex={2}
-              />
+      <section className="flex flex-col justify-start pb-12 pt-10 sm:pb-16 sm:pt-12 lg:min-h-[calc(100svh-4rem)] lg:justify-center lg:py-20">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_12rem] lg:items-center lg:gap-12">
+          <Reveal>
+            <div>
+              <div className="mb-5 flex flex-wrap items-center gap-x-5 gap-y-3 sm:mb-6">
+                <LivingStatus />
+              </div>
+              <h1 className="sr-only">
+                我是 Ryker，记录 AI、代理和带着判断力构建软件这件事。
+              </h1>
+              <div aria-hidden className="text-balance">
+                <HeroTitle
+                  words={[
+                    "我",
+                    "写",
+                    "AI、",
+                    "代理，",
+                    "也",
+                    "写",
+                    "把",
+                    "软件",
+                    "做得",
+                    "有判断。",
+                  ]}
+                  accentIndex={2}
+                />
+              </div>
             </div>
+          </Reveal>
+
+          <Reveal delay={100}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/avatar.png"
               alt="Ryker"
-              className="hidden h-32 w-32 shrink-0 rotate-3 rounded-2xl border border-hairline bg-paper-dim object-cover shadow-[0_20px_60px_-20px_rgba(28,25,22,0.25)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:rotate-0 hover:scale-105 sm:block lg:h-44 lg:w-44"
+              className="hidden h-32 w-32 justify-self-end rotate-3 rounded-2xl border border-hairline bg-paper-dim object-cover shadow-[0_20px_60px_-20px_rgba(28,25,22,0.25)] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:rotate-0 hover:scale-105 lg:block lg:h-44 lg:w-44"
             />
-          </div>
-        </Reveal>
+          </Reveal>
+        </div>
 
         <Reveal delay={150}>
-          <div className="mt-8 flex flex-col gap-6 border-t border-hairline pt-6 sm:mt-12 sm:flex-row sm:items-end sm:justify-between sm:gap-8 sm:pt-8">
-            <p className="max-w-md text-base leading-relaxed text-ink-soft sm:text-lg">
-              Essays and field notes on prompting, agents, and shipping
-              thoughtful software — written between the lines of daily work.
+          <div className="mt-7 grid gap-6 border-t border-hairline pt-6 sm:mt-8 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end sm:gap-8 lg:mt-10 lg:pt-7">
+            <p className="max-w-xl text-base leading-relaxed text-ink-soft sm:text-lg">
+              关于提示词、代理系统和软件品味的文章与现场笔记，写在日常工作缝隙里。
             </p>
-            <div className="flex flex-wrap items-center gap-5">
-              <Link
-                href="#articles"
-                className="group inline-flex items-center gap-3 rounded-full bg-ink px-6 py-3 font-mono text-[10px] uppercase tracking-label text-paper transition-colors duration-300 hover:bg-accent sm:px-7 sm:py-3.5 sm:text-[11px]"
-              >
-                Read the journal
-                <span className="transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1">
-                  ↓
-                </span>
-              </Link>
-            </div>
+            <Link
+              href="#articles"
+              className="group inline-flex w-fit items-center gap-3 rounded-full bg-ink px-6 py-3 font-mono text-[10px] uppercase tracking-label text-paper transition-colors duration-300 hover:bg-accent sm:px-7 sm:py-3.5 sm:text-[11px]"
+            >
+              阅读文章
+              <span className="transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1">
+                ↓
+              </span>
+            </Link>
           </div>
         </Reveal>
 
         <Reveal delay={250}>
-          <dl className="mt-8 flex flex-wrap items-center gap-x-5 gap-y-3 font-mono text-[10px] uppercase tracking-label text-ink-soft sm:mt-10 sm:gap-x-8 sm:text-[11px]">
+          <dl className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 font-mono text-[10px] uppercase tracking-label text-ink-soft sm:mt-8 sm:gap-x-8 sm:text-[11px]">
             <div className="flex items-baseline gap-2">
               <dt className="font-serif text-xl font-light tabular-nums text-ink sm:text-2xl">
                 {totalPosts}
@@ -148,23 +144,26 @@ export default async function Home({
             </div>
           </dl>
         </Reveal>
+      </section>
 
-        <Reveal delay={350}>
-          <div className="mt-9 flex flex-col items-center gap-4 sm:mt-14 sm:gap-6">
+      {/* ── Home afterglow ───────────────────────────────────── */}
+      <Reveal delay={300}>
+        <section className="border-t border-hairline py-10 sm:py-12">
+          <div className="mx-auto flex max-w-3xl flex-col items-center gap-5">
             <RandomQuote />
             <SocialLinks />
           </div>
-        </Reveal>
-      </section>
+        </section>
+      </Reveal>
 
-      {/* ── Recent writing timeline (innei-style) ────────────── */}
+      {/* ── Recent writing timeline ──────────────────────────── */}
       <section className="border-t border-hairline py-14 sm:py-20">
         <div className="mb-8 flex flex-wrap items-baseline gap-x-3 gap-y-1 sm:mb-10">
           <h2 className="font-serif text-[1.75rem] tracking-tight text-ink sm:text-3xl">
-            Recent writing
+            最近写下
           </h2>
           <span className="font-mono text-[11px] uppercase tracking-label text-ink-soft">
-            / 近期笔墨
+            / 新近
           </span>
         </div>
         <Timeline posts={recent} />
@@ -176,14 +175,14 @@ export default async function Home({
           <div className="mb-8 flex flex-col gap-2 sm:mb-12 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <h2 className="font-serif text-[1.75rem] tracking-tight text-ink sm:text-3xl">
-                Featured
+                精选文章
               </h2>
               <span className="font-mono text-[11px] uppercase tracking-label text-ink-soft">
                 / 精选
               </span>
             </div>
             <span className="font-mono text-[11px] uppercase tracking-label text-ink-soft">
-              Editor’s picks
+              编辑选择
             </span>
           </div>
 
@@ -200,7 +199,7 @@ export default async function Home({
                 <p className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-label text-ink-soft sm:mt-6">
                   {lead.author} · {formatDate(lead.createdAt)}
                   <span className="inline-flex items-center gap-1.5 text-accent opacity-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1 group-hover:opacity-100">
-                    Read <span>→</span>
+                    阅读 <span>→</span>
                   </span>
                 </p>
               </Link>
@@ -227,7 +226,7 @@ export default async function Home({
                         {post.excerpt}
                       </p>
                       <span className="mt-3 inline-flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-label text-accent opacity-0 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1 group-hover:opacity-100">
-                        Read <span>→</span>
+                        阅读 <span>→</span>
                       </span>
                     </div>
                   </Link>

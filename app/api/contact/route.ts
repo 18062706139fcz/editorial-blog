@@ -8,7 +8,7 @@ export async function POST(request: Request) {
 
     if (!name || !email) {
       return NextResponse.json(
-        { error: "Name and email are required." },
+        { error: "姓名和邮箱不能为空。" },
         { status: 400 }
       );
     }
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true });
   } catch {
     return NextResponse.json(
-      { error: "Something went wrong." },
+      { error: "发送失败，请稍后再试。" },
       { status: 500 }
     );
   }
