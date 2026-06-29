@@ -37,7 +37,7 @@ export default function DeskComposer({
     const textarea = textareaRef.current;
     if (!textarea) return;
     textarea.style.height = "auto";
-    textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
+    textarea.style.height = `${Math.min(Math.max(textarea.scrollHeight, 104), 224)}px`;
   }, [value]);
 
   function commit(input: string) {
@@ -142,7 +142,7 @@ export default function DeskComposer({
   return (
     <form
       onSubmit={handleSubmit}
-      className="border-t border-white/[0.08] pt-3 font-mono"
+      className="border-t border-white/[0.08] pb-2 pt-4 font-mono"
     >
       <label
         htmlFor="desk-composer"
@@ -150,14 +150,14 @@ export default function DeskComposer({
       >
         Desk input
       </label>
-      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-end gap-3">
-        <span className="pb-2 text-[13px] text-[#82d99b]">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-start gap-4">
+        <span className="pt-3 text-[13px] text-[#82d99b]">
           ryker@desk %
         </span>
         <div className="relative">
           {!value && !loading ? (
-            <span className="pointer-events-none absolute left-0 top-0 text-[13px] leading-6 text-[#d6e2d6]/26">
-              type /help or ask anything...
+            <span className="pointer-events-none absolute left-0 top-3 text-[15px] leading-7 text-[#d6e2d6]/26">
+              输入任务、粘贴上下文，或 /help
             </span>
           ) : null}
           <textarea
@@ -169,16 +169,16 @@ export default function DeskComposer({
               setHistoryIndex(null);
             }}
             onKeyDown={handleKeyDown}
-            rows={1}
+            rows={4}
             spellCheck={false}
             aria-label="Desk terminal prompt"
             disabled={loading}
-            className="relative z-10 block min-h-6 w-full resize-none overflow-hidden bg-transparent text-[13px] leading-6 text-[#f4f7f1] caret-[#82d99b] outline-none disabled:text-[#d6e2d6]/36"
+            className="relative z-10 block min-h-[6.5rem] max-h-[14rem] w-full resize-none overflow-hidden bg-transparent py-3 text-[15px] leading-7 text-[#f4f7f1] caret-[#82d99b] outline-none disabled:text-[#d6e2d6]/36"
           />
         </div>
       </div>
-      <p className="mt-2 pl-[7.25rem] font-mono text-[10px] uppercase tracking-label text-[#d6e2d6]/30">
-        enter send / shift+enter newline / up-down history / tab accept
+      <p className="mt-2 pl-[8rem] font-mono text-[10px] uppercase tracking-label text-[#d6e2d6]/30">
+        enter submit / shift+enter newline / up-down history / tab complete
         {suggestion ? ` -> ${suggestion}` : ""}
       </p>
     </form>

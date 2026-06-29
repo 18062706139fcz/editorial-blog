@@ -90,6 +90,9 @@ test("desk route uses one terminal transcript instead of dashboard cards", () =>
   assert.match(composer, /event\.key === "ArrowUp"/);
   assert.match(composer, /event\.key === "ArrowDown"/);
   assert.match(composer, /textareaRef\.current\?\.focus/);
+  assert.match(composer, /rows=\{4\}/);
+  assert.match(composer, /min-h-\[6\.5rem\]/);
+  assert.match(composer, /max-h-\[14rem\]/);
   assert.equal(composer.includes("<button"), false);
 
   assert.match(deskShell, /useRouter/);
@@ -105,6 +108,13 @@ test("desk lab is a hidden static A2UI component room", () => {
   assert.match(lab, /follow:\s*false/);
   assert.match(lab, /A2UIRenderer/);
   assert.match(lab, /sampleDeskA2UI/);
+  assert.match(lab, /A2UI protocol lab/);
+  assert.match(lab, /surfaceUpdate/);
+  assert.match(lab, /dataModelUpdate/);
+  assert.match(lab, /beginRendering/);
+  assert.match(lab, /userAction/);
+  assert.match(lab, /action completeness/);
+  assert.match(lab, /no_ui_chat/);
 });
 
 test("hidden rooms are not exposed through visible navigation surfaces", () => {
