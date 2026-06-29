@@ -1,12 +1,13 @@
 import type { DeskBlock } from "@/lib/features/desk/types";
+import A2UIRenderer from "./A2UIRenderer";
 
-const blockTone: Record<DeskBlock["kind"], string> = {
-  assistant: "border-[#7aa2f7]/20 bg-[#7aa2f7]/[0.055]",
-  command: "border-white/10 bg-white/[0.035]",
-  error: "border-[#e06c75]/35 bg-[#e06c75]/[0.08] text-[#f6caca]",
-  system: "border-[#82d99b]/20 bg-[#82d99b]/[0.055]",
-  ui: "border-[#e0b46a]/24 bg-[#e0b46a]/[0.07]",
-  user: "border-white/10 bg-[#0b0f12]",
+const blockAccent: Record<DeskBlock["kind"], string> = {
+  assistant: "text-[#7aa2f7]",
+  command: "text-[#d6e2d6]/52",
+  error: "text-[#e06c75]",
+  system: "text-[#82d99b]",
+  ui: "text-[#e0b46a]",
+  user: "text-[#82d99b]",
 };
 
 function blockPrefix(block: DeskBlock) {
@@ -18,6 +19,15 @@ function blockPrefix(block: DeskBlock) {
   return "system";
 }
 
+function blockGlyph(block: DeskBlock) {
+  if (block.kind === "user") return ">";
+  if (block.kind === "assistant") return "*";
+  if (block.kind === "error") return "!";
+  if (block.kind === "ui") return "+";
+  if (block.kind === "command") return "$";
+  return "-";
+}
+
 export default function TerminalTranscript({
   blocks,
   loading,
@@ -26,34 +36,44 @@ export default function TerminalTranscript({
   loading: boolean;
 }) {
   return (
-    <div className="min-h-[30rem] overflow-hidden rounded-[8px] border border-white/10 bg-[#0b0f12] shadow-[0_28px_80px_-56px_rgba(0,0,0,0.9)]">
-      <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 font-mono text-[10px] uppercase tracking-label text-[#d6e2d6]/50">
-        <span>terminal.transcript</span>
-        <span>{blocks.length} blocks</span>
-      </div>
-      <div className="max-h-[62svh] space-y-3 overflow-y-auto p-4">
+    <div
+      aria-label="Claude Code-style terminal transcript"
+      className="flex-1 overflow-y-auto pb-8 font-mono"
+    >
+      <div className="space-y-7">
         {blocks.map((block) => (
           <article
             key={block.id}
-            className={`rounded-[6px] border p-4 ${blockTone[block.kind]}`}
+            className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 gap-y-2"
           >
-            <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-label text-[#d6e2d6]/46">
-              <span>{blockPrefix(block)}</span>
-              {block.meta ? <span>{block.meta}</span> : null}
+            <span className={`pt-0.5 text-sm ${blockAccent[block.kind]}`}>
+              {blockGlyph(block)}
+            </span>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-label text-[#d6e2d6]/44">
+                <span className={blockAccent[block.kind]}>{blockPrefix(block)}</span>
+                {block.meta ? <span>{block.meta}</span> : null}
+              </div>
+              {block.title ? (
+                <h2 className="mt-2 text-[14px] leading-relaxed text-[#f4f7f1]">
+                  {block.title}
+                </h2>
+              ) : null}
+              <p className="mt-2 whitespace-pre-wrap text-[13px] leading-7 text-[#d6e2d6]/76">
+                {block.body}
+              </p>
+              {block.ui ? (
+                <div className="mt-4">
+                  <A2UIRenderer ui={block.ui} />
+                </div>
+              ) : null}
             </div>
-            {block.title ? (
-              <h2 className="mt-3 font-mono text-sm text-[#f4f7f1]">
-                {block.title}
-              </h2>
-            ) : null}
-            <p className="mt-3 whitespace-pre-wrap font-mono text-[13px] leading-relaxed text-[#d6e2d6]/78">
-              {block.body}
-            </p>
           </article>
         ))}
         {loading ? (
-          <div className="rounded-[6px] border border-[#82d99b]/20 bg-[#82d99b]/[0.055] p-4 font-mono text-[13px] text-[#d6e2d6]/70">
-            desk.agent is shaping a response...
+          <div className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 text-[13px] text-[#d6e2d6]/70">
+            <span className="text-[#82d99b]">...</span>
+            <span>desk.agent is shaping a response...</span>
           </div>
         ) : null}
       </div>

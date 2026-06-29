@@ -70,5 +70,7 @@ test("resolveDeskCommand handles local commands without remote calls", () => {
   const clear = resolveDeskCommand("clear");
   assert.deepEqual(clear, { kind: "clear" });
 
+  assert.equal(resolveDeskCommand("/help")?.kind, "blocks");
+
   assert.equal(resolveDeskCommand("what should I write?"), null);
 });

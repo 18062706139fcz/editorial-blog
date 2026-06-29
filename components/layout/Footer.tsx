@@ -9,6 +9,9 @@ const GITHUB_URL = "https://github.com/ryker";
 export default function Footer() {
   const pathname = usePathname();
   const isNightRoute = pathname === "/night";
+  const isDeskRoute = pathname === "/desk" || pathname.startsWith("/desk/");
+
+  if (isDeskRoute) return null;
 
   return (
     <footer

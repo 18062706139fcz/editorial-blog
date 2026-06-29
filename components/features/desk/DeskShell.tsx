@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { HiddenRoom } from "@/lib/features/hidden-rooms";
 import {
   createInitialDeskBlocks,
@@ -8,9 +8,7 @@ import {
 } from "@/lib/features/desk/commands";
 import { normalizeDeskAgentResponse } from "@/lib/features/desk/a2ui";
 import type { DeskBlock, DeskHistoryMessage } from "@/lib/features/desk/types";
-import A2UIRenderer from "./A2UIRenderer";
 import DeskComposer from "./DeskComposer";
-import DeskSessionBar from "./DeskSessionBar";
 import TerminalTranscript from "./TerminalTranscript";
 
 function createBlockId(prefix: string) {
@@ -36,14 +34,9 @@ function historyFromBlocks(blocks: DeskBlock[]): DeskHistoryMessage[] {
     }));
 }
 
-function latestUi(blocks: DeskBlock[]) {
-  return [...blocks].reverse().find((block) => block.ui)?.ui;
-}
-
 export default function DeskShell({ room }: { room: HiddenRoom }) {
   const [blocks, setBlocks] = useState<DeskBlock[]>(() => createInitialDeskBlocks());
   const [loading, setLoading] = useState(false);
-  const activeUi = useMemo(() => latestUi(blocks), [blocks]);
 
   async function handleSubmit(input: string) {
     const trimmed = input.trim();
@@ -96,7 +89,7 @@ export default function DeskShell({ room }: { room: HiddenRoom }) {
             id: createBlockId("ui"),
             kind: "ui",
             title: normalized.ui.type,
-            body: `Rendered ${normalized.ui.type} in the inspector.`,
+            body: `Rendered ${normalized.ui.type} inline.`,
             ui: normalized.ui,
           }
         : null;
@@ -124,30 +117,26 @@ export default function DeskShell({ room }: { room: HiddenRoom }) {
   }
 
   return (
-    <section className="mx-auto flex min-h-[calc(100svh-4rem)] w-full max-w-7xl flex-col px-4 py-4 sm:px-6 sm:py-6">
-      <DeskSessionBar room={room} loading={loading} />
+    <section className="fixed inset-0 z-30 min-h-screen overflow-hidden bg-[#080a0c] text-[#d6e2d6]">
+      <div className="flex h-screen min-h-screen flex-col px-4 py-4 sm:px-6 lg:px-8">
+        <div className="mb-6 font-mono">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-label text-[#d6e2d6]/40">
+            <span className="text-[#82d99b]">{room.eyebrow}</span>
+            <span>noindex</span>
+            <span>hidden</span>
+            <span>{loading ? "thinking" : "local-first"}</span>
+          </div>
+          <h1 className="mt-3 text-[15px] leading-relaxed text-[#f4f7f1]">
+            ryker@desk:~/scratch
+          </h1>
+          <p className="mt-1 max-w-4xl text-[13px] leading-6 text-[#d6e2d6]/58">
+            {room.summary}
+          </p>
+        </div>
 
-      <div className="grid flex-1 gap-4 py-4 lg:min-h-[38rem] lg:grid-cols-[minmax(0,1.25fr)_minmax(22rem,0.75fr)]">
         <TerminalTranscript blocks={blocks} loading={loading} />
-        <aside className="min-h-[22rem] overflow-hidden rounded-[8px] border border-white/10 bg-[#101418] shadow-[0_28px_80px_-56px_rgba(0,0,0,0.9)]">
-          <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 font-mono text-[10px] uppercase tracking-label text-[#d6e2d6]/50">
-            <span>a2ui.inspector</span>
-            <span>{activeUi?.type ?? "idle"}</span>
-          </div>
-          <div className="p-4">
-            {activeUi ? (
-              <A2UIRenderer ui={activeUi} />
-            ) : (
-              <div className="rounded-[6px] border border-dashed border-white/12 p-5 text-sm leading-relaxed text-[#d6e2d6]/58">
-                Ask the desk to organize, compare, plan, or extract something.
-                The next valid A2UI block will render here.
-              </div>
-            )}
-          </div>
-        </aside>
+        <DeskComposer loading={loading} onSubmit={handleSubmit} />
       </div>
-
-      <DeskComposer loading={loading} onSubmit={handleSubmit} />
     </section>
   );
 }

@@ -6,34 +6,35 @@ function isExternalHref(href: string) {
 
 export default function ArtifactList({ ui }: { ui: DeskArtifactListUI }) {
   return (
-    <section className="space-y-3">
+    <section>
       <div>
         <p className="font-mono text-[10px] uppercase tracking-label text-[#7aa2f7]">
           artifact.list
         </p>
-        <h2 className="mt-2 font-mono text-xl leading-tight text-[#f4f7f1]">
+        <h2 className="mt-2 font-mono text-[15px] leading-relaxed text-[#f4f7f1]">
           {ui.title}
         </h2>
         {ui.description ? (
-          <p className="mt-2 text-sm leading-relaxed text-[#d6e2d6]/62">
+          <p className="mt-1 text-[13px] leading-6 text-[#d6e2d6]/62">
             {ui.description}
           </p>
         ) : null}
       </div>
-      <div className="space-y-2">
+      <div className="mt-3 space-y-3">
         {ui.items.map((item) => {
           const content = (
-            <div className="rounded-[6px] border border-white/10 bg-white/[0.035] p-4 transition-colors hover:border-[#7aa2f7]/35">
-              <div className="flex items-center justify-between gap-3 font-mono text-[10px] uppercase tracking-label text-[#d6e2d6]/45">
-                <span>{item.label}</span>
-                {item.href ? <span>open</span> : null}
+            <div className="grid gap-2 sm:grid-cols-[8rem_minmax(0,1fr)]">
+              <span className="font-mono text-[11px] uppercase tracking-label text-[#d6e2d6]/42">
+                [{item.label}]
+              </span>
+              <div>
+                <h3 className="font-mono text-[13px] text-[#f4f7f1]">
+                  {item.title}
+                </h3>
+                <p className="mt-1 text-[13px] leading-6 text-[#d6e2d6]/66">
+                  {item.body}
+                </p>
               </div>
-              <h3 className="mt-3 font-mono text-sm text-[#f4f7f1]">
-                {item.title}
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#d6e2d6]/66">
-                {item.body}
-              </p>
             </div>
           );
 

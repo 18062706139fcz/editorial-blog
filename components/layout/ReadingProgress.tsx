@@ -1,12 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export default function ReadingProgress() {
+  const pathname = usePathname();
+  const isDeskRoute = pathname === "/desk" || pathname.startsWith("/desk/");
   const [progress, setProgress] = useState(0);
   const [showTop, setShowTop] = useState(false);
 
   useEffect(() => {
+    if (isDeskRoute) return;
+
     const onScroll = () => {
       const el = document.documentElement;
       const scrollable = el.scrollHeight - el.clientHeight;
@@ -17,7 +22,9 @@ export default function ReadingProgress() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  }, [isDeskRoute]);
+
+  if (isDeskRoute) return null;
 
   return (
     <>

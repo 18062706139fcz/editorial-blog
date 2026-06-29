@@ -37,6 +37,8 @@ export default function Nav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  if (isDeskRoute) return null;
+
   return (
     <header
       className={`sticky top-0 z-40 border-b backdrop-blur-md transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${

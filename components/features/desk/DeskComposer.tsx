@@ -1,6 +1,15 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import {
+  FormEvent,
+  KeyboardEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
+const suggestions = ["/help", "/show examples", "/show lab", "/clear"];
 
 export default function DeskComposer({
   loading,
@@ -10,19 +19,130 @@ export default function DeskComposer({
   onSubmit: (input: string) => void;
 }) {
   const [value, setValue] = useState("");
+  const [history, setHistory] = useState<string[]>([]);
+  const [historyIndex, setHistoryIndex] = useState<number | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const suggestion = useMemo(() => {
+    const input = value.trimStart().toLowerCase();
+    if (!input) return "/help";
+    return suggestions.find((item) => item.startsWith(input) && item !== input) ?? "";
+  }, [value]);
+
+  useEffect(() => {
+    textareaRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
+  }, [value]);
+
+  function commit(input: string) {
+    const trimmed = input.trim();
+    if (!trimmed || loading) return;
+    onSubmit(trimmed);
+    setHistory((current) =>
+      current[current.length - 1] === trimmed ? current : [...current, trimmed],
+    );
+    setHistoryIndex(null);
+    setValue("");
+  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const input = value.trim();
-    if (!input || loading) return;
-    onSubmit(input);
-    setValue("");
+    commit(value);
+  }
+
+  function insertNewline() {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      setValue((current) => `${current}\n`);
+      return;
+    }
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    setValue((current) => `${current.slice(0, start)}\n${current.slice(end)}`);
+    requestAnimationFrame(() => {
+      textarea.selectionStart = start + 1;
+      textarea.selectionEnd = start + 1;
+    });
+  }
+
+  function acceptSuggestion() {
+    if (!suggestion) return false;
+    setValue(suggestion);
+    setHistoryIndex(null);
+    return true;
+  }
+
+  function recallHistory(direction: -1 | 1) {
+    if (!history.length) return;
+    const nextIndex =
+      historyIndex === null
+        ? direction < 0
+          ? history.length - 1
+          : 0
+        : Math.min(Math.max(historyIndex + direction, 0), history.length - 1);
+    setHistoryIndex(nextIndex);
+    setValue(history[nextIndex]);
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.nativeEvent.isComposing) return;
+
+    if (event.key === "Enter") {
+      event.preventDefault();
+      if (event.shiftKey) {
+        insertNewline();
+        return;
+      }
+      if (value.endsWith("\\")) {
+        setValue((current) => `${current.slice(0, -1)}\n`);
+        return;
+      }
+      commit(value);
+      return;
+    }
+
+    if (event.ctrlKey && event.key.toLowerCase() === "j") {
+      event.preventDefault();
+      insertNewline();
+      return;
+    }
+
+    if (event.key === "ArrowUp" && !value.includes("\n")) {
+      event.preventDefault();
+      recallHistory(-1);
+      return;
+    }
+
+    if (event.key === "ArrowDown" && !value.includes("\n")) {
+      event.preventDefault();
+      recallHistory(1);
+      return;
+    }
+
+    if ((event.key === "Tab" || event.key === "ArrowRight") && suggestion) {
+      event.preventDefault();
+      acceptSuggestion();
+      return;
+    }
+
+    if (event.key === "Escape") {
+      event.preventDefault();
+      setValue("");
+      setHistoryIndex(null);
+    }
   }
 
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-[8px] border border-white/10 bg-[#101418] p-3 shadow-[0_24px_80px_-60px_rgba(0,0,0,0.9)]"
+      className="border-t border-white/[0.08] pt-3 font-mono"
     >
       <label
         htmlFor="desk-composer"
@@ -30,26 +150,37 @@ export default function DeskComposer({
       >
         Desk input
       </label>
-      <div className="flex items-end gap-3">
-        <span className="hidden pb-3 font-mono text-[12px] text-[#82d99b] sm:inline">
+      <div className="grid grid-cols-[auto_minmax(0,1fr)] items-end gap-3">
+        <span className="pb-2 text-[13px] text-[#82d99b]">
           ryker@desk %
         </span>
-        <textarea
-          id="desk-composer"
-          value={value}
-          onChange={(event) => setValue(event.target.value)}
-          rows={2}
-          placeholder="Ask for a note, list, decision matrix, or type help..."
-          className="min-h-12 flex-1 resize-none bg-transparent font-mono text-sm leading-relaxed text-[#f4f7f1] outline-none placeholder:text-[#d6e2d6]/32"
-        />
-        <button
-          type="submit"
-          disabled={loading || !value.trim()}
-          className="min-h-11 rounded-[6px] border border-[#82d99b]/30 bg-[#82d99b]/10 px-4 font-mono text-[10px] uppercase tracking-label text-[#d6e2d6] transition-colors hover:bg-[#82d99b]/18 disabled:cursor-not-allowed disabled:opacity-40"
-        >
-          {loading ? "wait" : "send"}
-        </button>
+        <div className="relative">
+          {!value && !loading ? (
+            <span className="pointer-events-none absolute left-0 top-0 text-[13px] leading-6 text-[#d6e2d6]/26">
+              type /help or ask anything...
+            </span>
+          ) : null}
+          <textarea
+            ref={textareaRef}
+            id="desk-composer"
+            value={value}
+            onChange={(event) => {
+              setValue(event.target.value);
+              setHistoryIndex(null);
+            }}
+            onKeyDown={handleKeyDown}
+            rows={1}
+            spellCheck={false}
+            aria-label="Desk terminal prompt"
+            disabled={loading}
+            className="relative z-10 block min-h-6 w-full resize-none overflow-hidden bg-transparent text-[13px] leading-6 text-[#f4f7f1] caret-[#82d99b] outline-none disabled:text-[#d6e2d6]/36"
+          />
+        </div>
       </div>
+      <p className="mt-2 pl-[7.25rem] font-mono text-[10px] uppercase tracking-label text-[#d6e2d6]/30">
+        enter send / shift+enter newline / up-down history / tab accept
+        {suggestion ? ` -> ${suggestion}` : ""}
+      </p>
     </form>
   );
 }

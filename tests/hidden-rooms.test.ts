@@ -62,6 +62,35 @@ test("desk route renders the A2UI shell instead of the old object surface", () =
   assert.equal(deskRoom.includes("work surface"), false);
 });
 
+test("desk route uses one terminal transcript instead of dashboard cards", () => {
+  const deskShell = source("../components/features/desk/DeskShell.tsx");
+  const transcript = source("../components/features/desk/TerminalTranscript.tsx");
+  const composer = source("../components/features/desk/DeskComposer.tsx");
+  const nav = source("../components/layout/Nav.tsx");
+  const footer = source("../components/layout/Footer.tsx");
+  const readingProgress = source("../components/layout/ReadingProgress.tsx");
+
+  assert.match(deskShell, /TerminalTranscript/);
+  assert.match(deskShell, /min-h-screen/);
+  assert.match(transcript, /Claude Code-style terminal/);
+  assert.match(nav, /if\s*\(isDeskRoute\)\s*return null/);
+  assert.match(footer, /if\s*\(isDeskRoute\)\s*return null/);
+  assert.match(readingProgress, /if\s*\(isDeskRoute\)\s*return null/);
+  assert.equal(deskShell.includes("a2ui.inspector"), false);
+  assert.equal(deskShell.includes("<aside"), false);
+  assert.equal(deskShell.includes("lg:grid-cols"), false);
+  assert.equal(transcript.includes("rounded-[6px] border p-4"), false);
+  assert.equal(composer.includes("rounded-[8px] border"), false);
+  assert.match(composer, /onKeyDown/);
+  assert.match(composer, /event\.key === "Enter"/);
+  assert.match(composer, /event\.shiftKey/);
+  assert.match(composer, /event\.ctrlKey/);
+  assert.match(composer, /event\.key === "ArrowUp"/);
+  assert.match(composer, /event\.key === "ArrowDown"/);
+  assert.match(composer, /textareaRef\.current\?\.focus/);
+  assert.equal(composer.includes("<button"), false);
+});
+
 test("desk lab is a hidden static A2UI component room", () => {
   const lab = source("../app/desk/lab/page.tsx");
 

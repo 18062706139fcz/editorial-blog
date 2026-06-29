@@ -60,9 +60,9 @@ const sampleDeskA2UI: DeskA2UI[] = [
     type: "commandHints",
     title: "Local commands",
     hints: [
-      { command: "help", description: "查看命令列表" },
-      { command: "show examples", description: "渲染本地样例" },
-      { command: "clear", description: "重置当前 session" },
+      { command: "/help", description: "查看命令列表" },
+      { command: "/show examples", description: "渲染本地样例" },
+      { command: "/clear", description: "重置当前 session" },
     ],
   },
 ];
@@ -83,11 +83,11 @@ export default function DeskLabPage() {
             toy. This route does not call DeepSeek.
           </p>
         </div>
-        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        <div className="mt-6 space-y-8 font-mono">
           {sampleDeskA2UI.map((ui) => (
             <div
               key={`${ui.type}-${"title" in ui ? ui.title : "sample"}`}
-              className="rounded-[8px] border border-white/10 bg-[#101418] p-4"
+              className="border-l border-white/10 pl-4"
             >
               <A2UIRenderer ui={ui} />
             </div>

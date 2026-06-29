@@ -6,19 +6,19 @@ export default function CommandHints({ ui }: { ui: DeskCommandHintsUI }) {
       <p className="font-mono text-[10px] uppercase tracking-label text-[#82d99b]">
         command.hints
       </p>
-      <h2 className="mt-2 font-mono text-xl leading-tight text-[#f4f7f1]">
+      <h2 className="mt-2 font-mono text-[15px] leading-relaxed text-[#f4f7f1]">
         {ui.title}
       </h2>
-      <div className="mt-4 grid gap-2">
+      <div className="mt-3 space-y-2">
         {ui.hints.map((hint) => (
           <div
             key={hint.command}
-            className="rounded-[6px] border border-white/10 bg-white/[0.035] p-3"
+            className="grid gap-2 sm:grid-cols-[12rem_minmax(0,1fr)]"
           >
             <code className="font-mono text-sm text-[#82d99b]">
-              {hint.command}
+              $ {hint.command}
             </code>
-            <p className="mt-1 text-sm leading-relaxed text-[#d6e2d6]/62">
+            <p className="text-[13px] leading-6 text-[#d6e2d6]/62">
               {hint.description}
             </p>
           </div>
