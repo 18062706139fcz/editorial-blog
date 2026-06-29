@@ -143,7 +143,7 @@ export default function DeskComposer({
     <form
       data-desk-zone="terminal-input"
       onSubmit={handleSubmit}
-      className="shrink-0 border-t-2 border-[#82d99b]/42 bg-[#060809] px-4 py-4 font-mono sm:px-6 lg:px-8"
+      className="shrink-0 border-t border-[#16211d] bg-[#060809] px-4 py-4 font-mono sm:px-6 lg:px-8"
     >
       <label
         htmlFor="desk-composer"
@@ -182,6 +182,15 @@ export default function DeskComposer({
         <span>enter submit / shift+enter newline / up-down history / tab complete</span>
         {suggestion ? <span>{` -> ${suggestion}`}</span> : null}
       </p>
+      {!value && !loading ? (
+        <div
+          data-desk-input-placeholder
+          className="mt-5 grid gap-2 pl-0 text-[11px] uppercase tracking-label text-[#d6e2d6]/22 sm:grid-cols-[8rem_minmax(0,1fr)] sm:pl-0"
+        >
+          <span className="text-[#82d99b]/44">session idle</span>
+          <span>paste a thought, compare a choice, or ask for a small A2UI surface</span>
+        </div>
+      ) : null}
     </form>
   );
 }

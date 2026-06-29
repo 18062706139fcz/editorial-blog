@@ -168,7 +168,7 @@ export default function DeskShell({ room }: { room: HiddenRoom }) {
       <div className="flex h-screen min-h-0 flex-col">
         <header
           data-desk-zone="intro"
-          className="shrink-0 border-b border-[#82d99b]/28 bg-[#080a0c] px-4 py-4 font-mono sm:px-6 lg:px-8"
+          className="shrink-0 border-b border-[#16211d] bg-[#080a0c] px-4 py-4 font-mono sm:px-6 lg:px-8"
         >
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-label text-[#d6e2d6]/40">
             <span className="text-[#82d99b]">{room.eyebrow}</span>

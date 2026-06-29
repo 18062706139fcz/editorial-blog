@@ -32,7 +32,6 @@ function SectionHeader({
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <span className="text-[#82d99b]">{label}</span>
         <span className="text-[#d6e2d6]/32">{description}</span>
-        <span className="h-px min-w-12 flex-1 bg-[#82d99b]/24" />
       </div>
     </div>
   );
@@ -131,7 +130,7 @@ export default function TerminalTranscript({
         {liveBlocks.length > 0 || loading ? (
           <section
             data-desk-transcript-section="live"
-            className="-mx-4 space-y-7 border-y-2 border-[#82d99b]/48 bg-[#82d99b]/[0.045] px-4 py-6 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
+            className="-mx-4 space-y-7 border-l border-[#82d99b]/35 bg-[#0b1110] px-4 py-6 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
           >
             <SectionHeader label="USER SESSION" description="generated from your input" />
             {liveBlocks.map((block) => (

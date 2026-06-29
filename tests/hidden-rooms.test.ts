@@ -87,7 +87,10 @@ test("desk route uses one terminal transcript instead of dashboard cards", () =>
   assert.match(transcript, /data-desk-transcript-section="live"/);
   assert.match(transcript, /SYSTEM SEED/);
   assert.match(transcript, /USER SESSION/);
-  assert.match(transcript, /border-y-2/);
+  assert.match(transcript, /border-l/);
+  assert.match(transcript, /bg-\[#0b1110\]/);
+  assert.equal(transcript.includes("border-y-2"), false);
+  assert.equal(transcript.includes("h-px min-w-12 flex-1"), false);
   assert.match(transcript, /scrollIntoView/);
   assert.match(transcript, /blocks\.length,\s*loading/);
   assert.match(nav, /if\s*\(isDeskRoute\)\s*return null/);
@@ -106,7 +109,9 @@ test("desk route uses one terminal transcript instead of dashboard cards", () =>
   assert.match(composer, /event\.key === "ArrowDown"/);
   assert.match(composer, /textareaRef\.current\?\.focus/);
   assert.match(composer, /data-desk-zone="terminal-input"/);
-  assert.match(composer, /border-t-2/);
+  assert.match(composer, /data-desk-input-placeholder/);
+  assert.match(composer, /session idle/);
+  assert.match(composer, /border-t border-\[#16211d\]/);
   assert.match(composer, /rows=\{4\}/);
   assert.match(composer, /min-h-\[8rem\]/);
   assert.match(composer, /max-h-\[16rem\]/);
