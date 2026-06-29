@@ -118,13 +118,14 @@ export function resolveDeskCommand(input: string): DeskCommandResult | null {
 
   if (command === "show lab") {
     return {
-      kind: "blocks",
+      kind: "navigate",
+      href: "/desk/lab",
       blocks: [
         {
           id: "cmd-lab",
           kind: "command",
           command: "show lab",
-          body: "Open /desk/lab to inspect every whitelisted A2UI component.",
+          body: "Opening /desk/lab to inspect every whitelisted A2UI component.",
           meta: "/desk/lab",
         },
       ],

@@ -92,4 +92,9 @@ export type DeskCommandResult =
   | {
       kind: "blocks";
       blocks: DeskBlock[];
+    }
+  | {
+      kind: "navigate";
+      href: string;
+      blocks: DeskBlock[];
     };

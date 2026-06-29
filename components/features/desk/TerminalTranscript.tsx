@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import type { DeskBlock } from "@/lib/features/desk/types";
 import A2UIRenderer from "./A2UIRenderer";
 
@@ -35,8 +38,22 @@ export default function TerminalTranscript({
   blocks: DeskBlock[];
   loading: boolean;
 }) {
+  const transcriptRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ block: "end" });
+      if (transcriptRef.current) {
+        transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight;
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [blocks.length, loading]);
+
   return (
     <div
+      ref={transcriptRef}
       aria-label="Claude Code-style terminal transcript"
       className="flex-1 overflow-y-auto pb-8 font-mono"
     >
@@ -76,6 +93,7 @@ export default function TerminalTranscript({
             <span>desk.agent is shaping a response...</span>
           </div>
         ) : null}
+        <div ref={bottomRef} aria-hidden />
       </div>
     </div>
   );

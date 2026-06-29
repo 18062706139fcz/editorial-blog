@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { HiddenRoom } from "@/lib/features/hidden-rooms";
 import {
   createInitialDeskBlocks,
@@ -35,6 +36,7 @@ function historyFromBlocks(blocks: DeskBlock[]): DeskHistoryMessage[] {
 }
 
 export default function DeskShell({ room }: { room: HiddenRoom }) {
+  const router = useRouter();
   const [blocks, setBlocks] = useState<DeskBlock[]>(() => createInitialDeskBlocks());
   const [loading, setLoading] = useState(false);
 
@@ -52,6 +54,14 @@ export default function DeskShell({ room }: { room: HiddenRoom }) {
 
     if (command?.kind === "blocks") {
       setBlocks((current) => [...current, userBlock, ...command.blocks]);
+      return;
+    }
+
+    if (command?.kind === "navigate") {
+      setBlocks((current) => [...current, userBlock, ...command.blocks]);
+      requestAnimationFrame(() => {
+        router.push(command.href);
+      });
       return;
     }
 

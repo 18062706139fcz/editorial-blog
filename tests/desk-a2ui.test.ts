@@ -72,5 +72,12 @@ test("resolveDeskCommand handles local commands without remote calls", () => {
 
   assert.equal(resolveDeskCommand("/help")?.kind, "blocks");
 
+  const lab = resolveDeskCommand("/show lab");
+  assert.equal(lab?.kind, "navigate");
+  if (lab?.kind !== "navigate") {
+    throw new Error("expected /show lab to navigate");
+  }
+  assert.equal(lab.href, "/desk/lab");
+
   assert.equal(resolveDeskCommand("what should I write?"), null);
 });

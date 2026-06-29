@@ -73,6 +73,8 @@ test("desk route uses one terminal transcript instead of dashboard cards", () =>
   assert.match(deskShell, /TerminalTranscript/);
   assert.match(deskShell, /min-h-screen/);
   assert.match(transcript, /Claude Code-style terminal/);
+  assert.match(transcript, /scrollIntoView/);
+  assert.match(transcript, /blocks\.length,\s*loading/);
   assert.match(nav, /if\s*\(isDeskRoute\)\s*return null/);
   assert.match(footer, /if\s*\(isDeskRoute\)\s*return null/);
   assert.match(readingProgress, /if\s*\(isDeskRoute\)\s*return null/);
@@ -89,6 +91,10 @@ test("desk route uses one terminal transcript instead of dashboard cards", () =>
   assert.match(composer, /event\.key === "ArrowDown"/);
   assert.match(composer, /textareaRef\.current\?\.focus/);
   assert.equal(composer.includes("<button"), false);
+
+  assert.match(deskShell, /useRouter/);
+  assert.match(deskShell, /router\.push\(command\.href\)/);
+  assert.match(deskShell, /command\?\.kind === "navigate"/);
 });
 
 test("desk lab is a hidden static A2UI component room", () => {
