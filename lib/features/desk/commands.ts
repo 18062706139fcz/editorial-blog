@@ -15,7 +15,7 @@ export function createInitialDeskBlocks(): DeskBlock[] {
       id: "boot",
       kind: "system",
       title: "desk.session",
-      body: "A hidden A2UI scratchpad is awake. Nothing here runs real shell commands.",
+      body: "A hidden A2UI scratchpad is awake. Slash commands stay local; ordinary prompts ask DeepSeek for a safe A2UI schema.",
       meta: "local",
     },
     {
@@ -61,7 +61,11 @@ export function resolveDeskCommand(input: string): DeskCommandResult | null {
     return {
       kind: "blocks",
       blocks: [
-        commandBlock("cmd-help", "help", "Local desk commands do not call DeepSeek."),
+        commandBlock(
+          "cmd-help",
+          "help",
+          "Local slash commands do not call DeepSeek. Ordinary text goes through /api/desk/agent, then renders any returned A2UI schema inline.",
+        ),
         {
           id: "cmd-help-ui",
           kind: "ui",
@@ -75,6 +79,7 @@ export function resolveDeskCommand(input: string): DeskCommandResult | null {
               { command: "/show examples", description: "Render sample A2UI output" },
               { command: "/show lab", description: "Navigate to /desk/lab" },
               { command: "/clear", description: "Reset the current transcript" },
+              { command: "any task", description: "Ask DeepSeek for { message, ui? }" },
             ],
           },
         },

@@ -53,9 +53,10 @@ export default function TerminalTranscript({
 
   return (
     <div
+      data-desk-zone="terminal-output"
       ref={transcriptRef}
       aria-label="Claude Code-style terminal transcript"
-      className="flex-1 overflow-y-auto pb-8 font-mono"
+      className="min-h-0 flex-1 overflow-y-auto bg-[#080a0c] px-4 py-6 font-mono sm:px-6 lg:px-8"
     >
       <div className="space-y-7">
         {blocks.map((block) => (

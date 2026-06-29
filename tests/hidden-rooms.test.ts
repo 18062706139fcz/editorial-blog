@@ -66,13 +66,21 @@ test("desk route uses one terminal transcript instead of dashboard cards", () =>
   const deskShell = source("../components/features/desk/DeskShell.tsx");
   const transcript = source("../components/features/desk/TerminalTranscript.tsx");
   const composer = source("../components/features/desk/DeskComposer.tsx");
+  const prompt = source("../lib/features/desk/prompt.ts");
   const nav = source("../components/layout/Nav.tsx");
   const footer = source("../components/layout/Footer.tsx");
   const readingProgress = source("../components/layout/ReadingProgress.tsx");
 
   assert.match(deskShell, /TerminalTranscript/);
   assert.match(deskShell, /min-h-screen/);
+  assert.match(deskShell, /deepseek\.call/);
+  assert.match(deskShell, /a2ui\.protocol/);
+  assert.match(deskShell, /A2UI schema received/);
+  assert.match(deskShell, /\/api\/desk\/agent/);
+  assert.match(deskShell, /data-desk-zone="intro"/);
+  assert.match(deskShell, /min-h-0/);
   assert.match(transcript, /Claude Code-style terminal/);
+  assert.match(transcript, /data-desk-zone="terminal-output"/);
   assert.match(transcript, /scrollIntoView/);
   assert.match(transcript, /blocks\.length,\s*loading/);
   assert.match(nav, /if\s*\(isDeskRoute\)\s*return null/);
@@ -90,10 +98,16 @@ test("desk route uses one terminal transcript instead of dashboard cards", () =>
   assert.match(composer, /event\.key === "ArrowUp"/);
   assert.match(composer, /event\.key === "ArrowDown"/);
   assert.match(composer, /textareaRef\.current\?\.focus/);
+  assert.match(composer, /data-desk-zone="terminal-input"/);
+  assert.match(composer, /border-t-2/);
   assert.match(composer, /rows=\{4\}/);
-  assert.match(composer, /min-h-\[6\.5rem\]/);
-  assert.match(composer, /max-h-\[14rem\]/);
+  assert.match(composer, /min-h-\[8rem\]/);
+  assert.match(composer, /max-h-\[16rem\]/);
   assert.equal(composer.includes("<button"), false);
+  assert.equal(composer.includes('data-desk-zone="shortcuts"'), false);
+  assert.match(prompt, /agent-to-user interface/);
+  assert.match(prompt, /surfaceUpdate/);
+  assert.match(prompt, /A2UI schema/);
 
   assert.match(deskShell, /useRouter/);
   assert.match(deskShell, /router\.push\(command\.href\)/);
