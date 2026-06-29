@@ -13,6 +13,11 @@
     background-color: #050506;
     color: #f7f0e8;
   }
+  html[data-route-theme="desk"],
+  html[data-route-theme="desk"] body {
+    background-color: #080a0c;
+    color: #d6e2d6;
+  }
   ::selection {
     background-color: #1c1916;
     color: #faf8f2;
@@ -20,5 +25,9 @@
   html[data-route-theme="night"] ::selection {
     background-color: #f7f0e8;
     color: #050506;
+  }
+  html[data-route-theme="desk"] ::selection {
+    background-color: #82d99b;
+    color: #080a0c;
   }
 }

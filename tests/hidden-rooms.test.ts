@@ -54,6 +54,24 @@ test("lost remains a quiet hidden room while night and desk use dedicated experi
   );
 });
 
+test("desk route renders the A2UI shell instead of the old object surface", () => {
+  const deskRoom = source("../components/features/desk/DeskRoom.tsx");
+
+  assert.match(deskRoom, /DeskShell/);
+  assert.equal(deskRoom.includes("deskObjects"), false);
+  assert.equal(deskRoom.includes("work surface"), false);
+});
+
+test("desk lab is a hidden static A2UI component room", () => {
+  const lab = source("../app/desk/lab/page.tsx");
+
+  assert.match(lab, /robots/);
+  assert.match(lab, /index:\s*false/);
+  assert.match(lab, /follow:\s*false/);
+  assert.match(lab, /A2UIRenderer/);
+  assert.match(lab, /sampleDeskA2UI/);
+});
+
 test("hidden rooms are not exposed through visible navigation surfaces", () => {
   const nav = source("../components/layout/Nav.tsx");
   const footer = source("../components/layout/Footer.tsx");
@@ -62,6 +80,9 @@ test("hidden rooms are not exposed through visible navigation surfaces", () => {
     assert.equal(nav.includes(`href="/${route}"`), false);
     assert.equal(footer.includes(`href="/${route}"`), false);
   }
+
+  assert.equal(nav.includes('href="/desk/lab"'), false);
+  assert.equal(footer.includes('href="/desk/lab"'), false);
 });
 
 test("visible nav does not default unknown hidden routes to the articles tab", () => {
@@ -260,4 +281,30 @@ test("night route opts the global chrome into a dark surface", () => {
   assert.match(routeTheme, /data-route-theme/);
   assert.match(routeTheme, /pathname\s*===\s*"\/night"/);
   assert.match(globals, /data-route-theme="night"/);
+});
+
+test("desk routes opt the global chrome into a contained dark shell", () => {
+  const nav = source("../components/layout/Nav.tsx");
+  const routeTheme = source("../components/layout/RouteTheme.tsx");
+  const deskShell = source("../components/features/desk/DeskShell.tsx");
+
+  assert.match(routeTheme, /pathname\.startsWith\("\/desk\/"\)/);
+  assert.match(routeTheme, /"desk"/);
+  assert.match(nav, /isDeskRoute/);
+  assert.equal(deskShell.includes("DEEPSEEK_API_KEY"), false);
+});
+
+test("desk agent API keeps DeepSeek access on the server", () => {
+  const route = source("../app/api/desk/agent/route.ts");
+  const deskShell = source("../components/features/desk/DeskShell.tsx");
+
+  assert.match(route, /process\.env\.DEEPSEEK_API_KEY/);
+  assert.match(route, /process\.env\.DEEPSEEK_MODEL/);
+  assert.match(route, /https:\/\/api\.deepseek\.com\/chat\/completions/);
+  assert.match(route, /buildDeskMessages/);
+  assert.match(route, /parseDeskAgentResponse/);
+  assert.match(route, /normalizeDeskInput/);
+  assert.match(route, /NextResponse\.json/);
+  assert.equal(deskShell.includes("api.deepseek.com"), false);
+  assert.equal(deskShell.includes("DEEPSEEK_API_KEY"), false);
 });

@@ -20,6 +20,8 @@ export default function Nav() {
   );
   const hasActiveItem = activeIndex >= 0;
   const isNightRoute = pathname === "/night";
+  const isDeskRoute = pathname === "/desk" || pathname.startsWith("/desk/");
+  const isDarkRoute = isNightRoute || isDeskRoute;
 
   useEffect(() => {
     let lastY = window.scrollY;
@@ -41,10 +43,10 @@ export default function Nav() {
         hidden ? "-translate-y-full" : "translate-y-0"
       } ${
         scrolled
-          ? isNightRoute
+          ? isDarkRoute
             ? "border-white/10 bg-[#050506]/92"
             : "border-hairline bg-paper/85"
-          : isNightRoute
+          : isDarkRoute
             ? "border-white/10 bg-[#050506]/88"
             : "border-transparent bg-paper/60"
       }`}
@@ -54,7 +56,7 @@ export default function Nav() {
           <Logomark className="h-8 w-8 text-[20px] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:-rotate-6" />
           <span
             className={`font-serif text-2xl font-medium tracking-tight ${
-              isNightRoute ? "text-[#f7f0e8]" : "text-ink"
+              isDarkRoute ? "text-[#f7f0e8]" : "text-ink"
             }`}
           >
             Ryker
@@ -63,7 +65,7 @@ export default function Nav() {
         <nav className="flex items-center gap-3 sm:gap-5">
           <div
             className={`relative grid grid-cols-2 rounded-full border p-1 shadow-[0_10px_30px_-24px_rgba(28,25,22,0.35)] ${
-              isNightRoute
+              isDarkRoute
                 ? "border-white/12 bg-white/[0.03]"
                 : "border-hairline bg-paper/70"
             }`}
@@ -92,7 +94,7 @@ export default function Nav() {
                 className={`relative z-10 min-w-[3.65rem] rounded-full px-3 py-1.5 text-center font-mono text-[10px] uppercase tracking-label transition-colors duration-200 sm:px-3.5 sm:text-[11px] ${
                   active
                     ? "text-paper delay-100"
-                    : isNightRoute
+                    : isDarkRoute
                       ? "text-white/48 hover:text-white"
                       : "text-ink-soft hover:text-ink"
                 }`}
@@ -102,7 +104,7 @@ export default function Nav() {
               );
             })}
           </div>
-          <OnlineCount tone={isNightRoute ? "dark" : "light"} />
+          <OnlineCount tone={isDarkRoute ? "dark" : "light"} />
         </nav>
       </div>
     </header>
