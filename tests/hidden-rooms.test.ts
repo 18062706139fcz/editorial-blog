@@ -81,6 +81,12 @@ test("desk route uses one terminal transcript instead of dashboard cards", () =>
   assert.match(deskShell, /min-h-0/);
   assert.match(transcript, /Claude Code-style terminal/);
   assert.match(transcript, /data-desk-zone="terminal-output"/);
+  assert.match(transcript, /data-desk-section=\{isSeedBlock\(block\) \? "seed" : "live"\}/);
+  assert.match(transcript, /data-desk-divider=\{marker\}/);
+  assert.match(transcript, /marker="session-start"/);
+  assert.match(transcript, /marker="live-turns"/);
+  assert.match(transcript, /DESK BOOT/);
+  assert.match(transcript, /USER TURNS/);
   assert.match(transcript, /scrollIntoView/);
   assert.match(transcript, /blocks\.length,\s*loading/);
   assert.match(nav, /if\s*\(isDeskRoute\)\s*return null/);
