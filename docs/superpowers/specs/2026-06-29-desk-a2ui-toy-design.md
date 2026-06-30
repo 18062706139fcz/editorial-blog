@@ -43,6 +43,8 @@
 2. 主体 split view：左侧是 terminal transcript，右侧是 A2UI inspector。
 3. 底部 composer：用户输入自然语言或轻命令。
 
+底部 composer 的快捷键提示、候选命令槽位和 idle hint 要保留稳定高度；输入文字、清空文字或进入 loading 时不能因为辅助信息卸载而造成页面跳变。
+
 默认提示符：
 
 ```text

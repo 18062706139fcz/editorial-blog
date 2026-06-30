@@ -109,8 +109,19 @@ test("desk route uses one terminal transcript instead of dashboard cards", () =>
   assert.match(composer, /event\.key === "ArrowDown"/);
   assert.match(composer, /textareaRef\.current\?\.focus/);
   assert.match(composer, /data-desk-zone="terminal-input"/);
+  assert.match(composer, /data-desk-suggestion-slot/);
+  assert.equal(
+    composer.includes("{suggestion ? <span>{` -> ${suggestion}`}</span> : null}"),
+    false,
+  );
   assert.match(composer, /data-desk-input-placeholder/);
   assert.match(composer, /session idle/);
+  const placeholderIndex = composer.indexOf("data-desk-input-placeholder");
+  const placeholderMountGuard = composer.slice(
+    Math.max(0, placeholderIndex - 180),
+    placeholderIndex,
+  );
+  assert.equal(placeholderMountGuard.includes("!value && !loading"), false);
   assert.match(composer, /border-t border-\[#16211d\]/);
   assert.match(composer, /rows=\{4\}/);
   assert.match(composer, /min-h-\[8rem\]/);

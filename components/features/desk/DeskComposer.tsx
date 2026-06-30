@@ -180,17 +180,21 @@ export default function DeskComposer({
       </div>
       <p className="mt-2 pl-0 text-[10px] uppercase tracking-label text-[#d6e2d6]/30 sm:pl-[8rem]">
         <span>enter submit / shift+enter newline / up-down history / tab complete</span>
-        {suggestion ? <span>{` -> ${suggestion}`}</span> : null}
-      </p>
-      {!value && !loading ? (
-        <div
-          data-desk-input-placeholder
-          className="mt-5 grid gap-2 pl-0 text-[11px] uppercase tracking-label text-[#d6e2d6]/22 sm:grid-cols-[8rem_minmax(0,1fr)] sm:pl-0"
+        <span
+          data-desk-suggestion-slot
+          aria-hidden={!suggestion}
+          className="inline-block min-w-[7rem]"
         >
-          <span className="text-[#82d99b]/44">session idle</span>
-          <span>paste a thought, compare a choice, or ask for a small A2UI surface</span>
-        </div>
-      ) : null}
+          {suggestion ? ` -> ${suggestion}` : "\u00a0"}
+        </span>
+      </p>
+      <div
+        data-desk-input-placeholder
+        className="mt-5 grid min-h-[2rem] gap-2 pl-0 text-[11px] uppercase tracking-label text-[#d6e2d6]/22 sm:grid-cols-[8rem_minmax(0,1fr)] sm:pl-0"
+      >
+        <span className="text-[#82d99b]/44">session idle</span>
+        <span>paste a thought, compare a choice, or ask for a small A2UI surface</span>
+      </div>
     </form>
   );
 }
