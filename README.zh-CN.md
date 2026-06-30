@@ -40,7 +40,21 @@
       <img src="./public/screenshots/mobile-hero.png" alt="移动端首屏">
     </td>
   </tr>
+  <tr>
+    <td colspan="2">
+      <strong>隐藏书桌 · 终端</strong><br>
+      <img src="./public/screenshots/desk-terminal.jpg" alt="隐藏书桌终端页面">
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <strong>隐藏书桌 · A2UI 回合</strong><br>
+      <img src="./public/screenshots/desk-a2ui-turn.jpg" alt="隐藏书桌 A2UI 回合页面">
+    </td>
+  </tr>
 </table>
+
+隐藏 `/desk` 房间不会出现在公开导航里。它是一个终端式 scratchpad，用来承载本地命令和小型 agent-to-user UI 实验。
 
 ## 功能
 
@@ -50,6 +64,7 @@
 - 私有后台：创建、编辑、发布、取消发布和删除文章。
 - 基于密码的后台登录，会话使用 HTTP-only cookie。
 - 后台入口不出现在公开导航中，并标记为 `noindex, nofollow, noarchive`。
+- 隐藏 `/desk` 房间：Claude Code 风格终端界面、本地 slash commands、DeepSeek 对话回合，以及经过校验的 A2UI schema 渲染。
 - 使用 SQLite + Prisma，适合个人博客和轻量发布流程。
 - 包含 Dockerfile 和 docker-compose，便于做部署实验。
 
@@ -77,6 +92,7 @@ npm install
 DATABASE_URL="file:./dev.db"
 ADMIN_PASSWORD="change-me"
 AUTH_SECRET="replace-with-a-long-random-string"
+DEEPSEEK_API_KEY="optional-for-desk-agent"
 ```
 
 初始化数据库：
@@ -96,6 +112,13 @@ npm run dev
 
 - 前台：`http://localhost:3000`
 - 后台登录：`http://localhost:3000/admin/login`
+- 隐藏书桌：`http://localhost:3000/desk`
+
+`/desk` 在没有 `DEEPSEEK_API_KEY` 时仍可使用本地命令，例如 `/help`、
+`/show examples`、`/show lab` 和 `/clear`。普通输入会请求
+`/api/desk/agent`，DeepSeek key 只在服务端读取；前端只渲染 allowlist
+里的小型 A2UI JSON：note、artifact list、decision matrix、command
+hints。模型返回的 HTML、CSS 或脚本不会被直接渲染。
 
 ## 脚本
 
