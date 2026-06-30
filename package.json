@@ -7,8 +7,14 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "tsx --test tests/*.test.ts",
+    "check:docs": "node scripts/check-docs-updated.mjs",
+    "ci": "npm run lint && npm test && npm run check:docs && npm run build",
+    "hooks:install": "node scripts/install-git-hooks.mjs",
+    "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
+    "prepare": "node scripts/install-git-hooks.mjs",
     "postinstall": "prisma generate"
   },
   "prisma": {
