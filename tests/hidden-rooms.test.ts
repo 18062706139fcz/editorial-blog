@@ -54,6 +54,106 @@ test("lost remains a quiet hidden room while night and desk use dedicated experi
   );
 });
 
+test("desk route renders the A2UI shell instead of the old object surface", () => {
+  const deskRoom = source("../components/features/desk/DeskRoom.tsx");
+
+  assert.match(deskRoom, /DeskShell/);
+  assert.equal(deskRoom.includes("deskObjects"), false);
+  assert.equal(deskRoom.includes("work surface"), false);
+});
+
+test("desk route uses one terminal transcript instead of dashboard cards", () => {
+  const deskShell = source("../components/features/desk/DeskShell.tsx");
+  const transcript = source("../components/features/desk/TerminalTranscript.tsx");
+  const composer = source("../components/features/desk/DeskComposer.tsx");
+  const prompt = source("../lib/features/desk/prompt.ts");
+  const nav = source("../components/layout/Nav.tsx");
+  const footer = source("../components/layout/Footer.tsx");
+  const readingProgress = source("../components/layout/ReadingProgress.tsx");
+
+  assert.match(deskShell, /TerminalTranscript/);
+  assert.match(deskShell, /min-h-screen/);
+  assert.match(deskShell, /deepseek\.call/);
+  assert.match(deskShell, /a2ui\.protocol/);
+  assert.match(deskShell, /A2UI schema received/);
+  assert.match(deskShell, /\/api\/desk\/agent/);
+  assert.match(deskShell, /data-desk-zone="intro"/);
+  assert.match(deskShell, /min-h-0/);
+  assert.match(transcript, /Claude Code-style terminal/);
+  assert.match(transcript, /data-desk-zone="terminal-output"/);
+  assert.match(transcript, /const seedBlocks = blocks\.filter\(isSeedBlock\)/);
+  assert.match(transcript, /const liveBlocks = blocks\.filter\(\(block\) => !isSeedBlock\(block\)\)/);
+  assert.match(transcript, /data-desk-transcript-section="seed"/);
+  assert.match(transcript, /data-desk-transcript-section="live"/);
+  assert.match(transcript, /SYSTEM SEED/);
+  assert.match(transcript, /USER SESSION/);
+  assert.match(transcript, /border-l/);
+  assert.match(transcript, /bg-\[#0b1110\]/);
+  assert.equal(transcript.includes("border-y-2"), false);
+  assert.equal(transcript.includes("h-px min-w-12 flex-1"), false);
+  assert.match(transcript, /scrollIntoView/);
+  assert.match(transcript, /blocks\.length,\s*loading/);
+  assert.match(nav, /if\s*\(isDeskRoute\)\s*return null/);
+  assert.match(footer, /if\s*\(isDeskRoute\)\s*return null/);
+  assert.match(readingProgress, /if\s*\(isDeskRoute\)\s*return null/);
+  assert.equal(deskShell.includes("a2ui.inspector"), false);
+  assert.equal(deskShell.includes("<aside"), false);
+  assert.equal(deskShell.includes("lg:grid-cols"), false);
+  assert.equal(transcript.includes("rounded-[6px] border p-4"), false);
+  assert.equal(composer.includes("rounded-[8px] border"), false);
+  assert.match(composer, /onKeyDown/);
+  assert.match(composer, /event\.key === "Enter"/);
+  assert.match(composer, /event\.shiftKey/);
+  assert.match(composer, /event\.ctrlKey/);
+  assert.match(composer, /event\.key === "ArrowUp"/);
+  assert.match(composer, /event\.key === "ArrowDown"/);
+  assert.match(composer, /textareaRef\.current\?\.focus/);
+  assert.match(composer, /data-desk-zone="terminal-input"/);
+  assert.match(composer, /data-desk-suggestion-slot/);
+  assert.equal(
+    composer.includes("{suggestion ? <span>{` -> ${suggestion}`}</span> : null}"),
+    false,
+  );
+  assert.match(composer, /data-desk-input-placeholder/);
+  assert.match(composer, /session idle/);
+  const placeholderIndex = composer.indexOf("data-desk-input-placeholder");
+  const placeholderMountGuard = composer.slice(
+    Math.max(0, placeholderIndex - 180),
+    placeholderIndex,
+  );
+  assert.equal(placeholderMountGuard.includes("!value && !loading"), false);
+  assert.match(composer, /border-t border-\[#16211d\]/);
+  assert.match(composer, /rows=\{4\}/);
+  assert.match(composer, /min-h-\[8rem\]/);
+  assert.match(composer, /max-h-\[16rem\]/);
+  assert.equal(composer.includes("<button"), false);
+  assert.equal(composer.includes('data-desk-zone="shortcuts"'), false);
+  assert.match(prompt, /agent-to-user interface/);
+  assert.match(prompt, /surfaceUpdate/);
+  assert.match(prompt, /A2UI schema/);
+
+  assert.match(deskShell, /useRouter/);
+  assert.match(deskShell, /router\.push\(command\.href\)/);
+  assert.match(deskShell, /command\?\.kind === "navigate"/);
+});
+
+test("desk lab is a hidden static A2UI component room", () => {
+  const lab = source("../app/desk/lab/page.tsx");
+
+  assert.match(lab, /robots/);
+  assert.match(lab, /index:\s*false/);
+  assert.match(lab, /follow:\s*false/);
+  assert.match(lab, /A2UIRenderer/);
+  assert.match(lab, /sampleDeskA2UI/);
+  assert.match(lab, /A2UI protocol lab/);
+  assert.match(lab, /surfaceUpdate/);
+  assert.match(lab, /dataModelUpdate/);
+  assert.match(lab, /beginRendering/);
+  assert.match(lab, /userAction/);
+  assert.match(lab, /action completeness/);
+  assert.match(lab, /no_ui_chat/);
+});
+
 test("hidden rooms are not exposed through visible navigation surfaces", () => {
   const nav = source("../components/layout/Nav.tsx");
   const footer = source("../components/layout/Footer.tsx");
@@ -62,6 +162,9 @@ test("hidden rooms are not exposed through visible navigation surfaces", () => {
     assert.equal(nav.includes(`href="/${route}"`), false);
     assert.equal(footer.includes(`href="/${route}"`), false);
   }
+
+  assert.equal(nav.includes('href="/desk/lab"'), false);
+  assert.equal(footer.includes('href="/desk/lab"'), false);
 });
 
 test("visible nav does not default unknown hidden routes to the articles tab", () => {
@@ -260,4 +363,30 @@ test("night route opts the global chrome into a dark surface", () => {
   assert.match(routeTheme, /data-route-theme/);
   assert.match(routeTheme, /pathname\s*===\s*"\/night"/);
   assert.match(globals, /data-route-theme="night"/);
+});
+
+test("desk routes opt the global chrome into a contained dark shell", () => {
+  const nav = source("../components/layout/Nav.tsx");
+  const routeTheme = source("../components/layout/RouteTheme.tsx");
+  const deskShell = source("../components/features/desk/DeskShell.tsx");
+
+  assert.match(routeTheme, /pathname\.startsWith\("\/desk\/"\)/);
+  assert.match(routeTheme, /"desk"/);
+  assert.match(nav, /isDeskRoute/);
+  assert.equal(deskShell.includes("DEEPSEEK_API_KEY"), false);
+});
+
+test("desk agent API keeps DeepSeek access on the server", () => {
+  const route = source("../app/api/desk/agent/route.ts");
+  const deskShell = source("../components/features/desk/DeskShell.tsx");
+
+  assert.match(route, /process\.env\.DEEPSEEK_API_KEY/);
+  assert.match(route, /process\.env\.DEEPSEEK_MODEL/);
+  assert.match(route, /https:\/\/api\.deepseek\.com\/chat\/completions/);
+  assert.match(route, /buildDeskMessages/);
+  assert.match(route, /parseDeskAgentResponse/);
+  assert.match(route, /normalizeDeskInput/);
+  assert.match(route, /NextResponse\.json/);
+  assert.equal(deskShell.includes("api.deepseek.com"), false);
+  assert.equal(deskShell.includes("DEEPSEEK_API_KEY"), false);
 });

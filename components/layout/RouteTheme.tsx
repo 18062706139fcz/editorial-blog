@@ -7,7 +7,9 @@ export default function RouteTheme() {
   const pathname = usePathname();
 
   useEffect(() => {
-    const theme = pathname === "/night" ? "night" : "default";
+    const isNightRoute = pathname === "/night";
+    const isDeskRoute = pathname === "/desk" || pathname.startsWith("/desk/");
+    const theme = isNightRoute ? "night" : isDeskRoute ? "desk" : "default";
     document.documentElement.setAttribute("data-route-theme", theme);
     document.body.setAttribute("data-route-theme", theme);
 

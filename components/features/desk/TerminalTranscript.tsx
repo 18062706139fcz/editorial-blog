@@ -1,0 +1,151 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import type { DeskBlock } from "@/lib/features/desk/types";
+import A2UIRenderer from "./A2UIRenderer";
+
+const blockAccent: Record<DeskBlock["kind"], string> = {
+  assistant: "text-[#7aa2f7]",
+  command: "text-[#d6e2d6]/52",
+  error: "text-[#e06c75]",
+  system: "text-[#82d99b]",
+  ui: "text-[#e0b46a]",
+  user: "text-[#82d99b]",
+};
+
+const seedBlockIds = new Set(["boot", "welcome-ui", "help-hint"]);
+
+function isSeedBlock(block: DeskBlock) {
+  return seedBlockIds.has(block.id);
+}
+
+function SectionHeader({
+  label,
+  description,
+}: {
+  label: string;
+  description: string;
+}) {
+  return (
+    <div className="grid grid-cols-[1.25rem_minmax(0,1fr)] items-center gap-x-3 text-[10px] uppercase tracking-label">
+      <span className="text-[#82d99b]">·</span>
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <span className="text-[#82d99b]">{label}</span>
+        <span className="text-[#d6e2d6]/32">{description}</span>
+      </div>
+    </div>
+  );
+}
+
+function TranscriptBlock({ block }: { block: DeskBlock }) {
+  return (
+    <article
+      data-desk-section={isSeedBlock(block) ? "seed" : "live"}
+      className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 gap-y-2"
+    >
+      <span className={`pt-0.5 text-sm ${blockAccent[block.kind]}`}>
+        {blockGlyph(block)}
+      </span>
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] uppercase tracking-label text-[#d6e2d6]/44">
+          <span className={blockAccent[block.kind]}>{blockPrefix(block)}</span>
+          {block.meta ? <span>{block.meta}</span> : null}
+        </div>
+        {block.title ? (
+          <h2 className="mt-2 text-[14px] leading-relaxed text-[#f4f7f1]">
+            {block.title}
+          </h2>
+        ) : null}
+        <p className="mt-2 whitespace-pre-wrap text-[13px] leading-7 text-[#d6e2d6]/76">
+          {block.body}
+        </p>
+        {block.ui ? (
+          <div className="mt-4">
+            <A2UIRenderer ui={block.ui} />
+          </div>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
+function blockPrefix(block: DeskBlock) {
+  if (block.kind === "user") return "ryker@desk %";
+  if (block.kind === "assistant") return "desk.agent";
+  if (block.kind === "error") return "desk.error";
+  if (block.kind === "ui") return "a2ui.render";
+  if (block.kind === "command") return block.command ?? "desk.command";
+  return "system";
+}
+
+function blockGlyph(block: DeskBlock) {
+  if (block.kind === "user") return ">";
+  if (block.kind === "assistant") return "*";
+  if (block.kind === "error") return "!";
+  if (block.kind === "ui") return "+";
+  if (block.kind === "command") return "$";
+  return "-";
+}
+
+export default function TerminalTranscript({
+  blocks,
+  loading,
+}: {
+  blocks: DeskBlock[];
+  loading: boolean;
+}) {
+  const transcriptRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const seedBlocks = blocks.filter(isSeedBlock);
+  const liveBlocks = blocks.filter((block) => !isSeedBlock(block));
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({ block: "end" });
+      if (transcriptRef.current) {
+        transcriptRef.current.scrollTop = transcriptRef.current.scrollHeight;
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [blocks.length, loading]);
+
+  return (
+    <div
+      data-desk-zone="terminal-output"
+      ref={transcriptRef}
+      aria-label="Claude Code-style terminal transcript"
+      className="min-h-0 flex-1 overflow-y-auto bg-[#080a0c] px-4 py-6 font-mono sm:px-6 lg:px-8"
+    >
+      <div className="space-y-9">
+        <section
+          data-desk-transcript-section="seed"
+          className="space-y-7 opacity-[0.78]"
+        >
+          <SectionHeader label="SYSTEM SEED" description="preloaded by /desk" />
+          {seedBlocks.map((block) => (
+            <TranscriptBlock key={block.id} block={block} />
+          ))}
+        </section>
+
+        {liveBlocks.length > 0 || loading ? (
+          <section
+            data-desk-transcript-section="live"
+            className="-mx-4 space-y-7 border-l border-[#82d99b]/35 bg-[#0b1110] px-4 py-6 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8"
+          >
+            <SectionHeader label="USER SESSION" description="generated from your input" />
+            {liveBlocks.map((block) => (
+              <TranscriptBlock key={block.id} block={block} />
+            ))}
+            {loading ? (
+              <div className="grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-3 text-[13px] text-[#d6e2d6]/70">
+                <span className="text-[#82d99b]">...</span>
+                <span>desk.agent is shaping a response...</span>
+              </div>
+            ) : null}
+          </section>
+        ) : null}
+        <div ref={bottomRef} aria-hidden />
+      </div>
+    </div>
+  );
+}

@@ -40,7 +40,23 @@ An editorial personal blog for writing about AI engineering, prompting, agents, 
       <img src="./public/screenshots/mobile-hero.png" alt="Mobile hero screen">
     </td>
   </tr>
+  <tr>
+    <td colspan="2">
+      <strong>Hidden Desk · Terminal</strong><br>
+      <img src="./public/screenshots/desk-terminal.jpg" alt="Hidden desk terminal screen">
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <strong>Hidden Desk · A2UI Turn</strong><br>
+      <img src="./public/screenshots/desk-a2ui-turn.jpg" alt="Hidden desk A2UI turn screen">
+    </td>
+  </tr>
 </table>
+
+The hidden `/desk` room is intentionally absent from public navigation. It is a
+terminal-like scratchpad for local commands and small agent-to-user UI
+experiments.
 
 ## Features
 
@@ -50,6 +66,7 @@ An editorial personal blog for writing about AI engineering, prompting, agents, 
 - Private admin for creating, editing, publishing, unpublishing, and deleting posts.
 - Password-based admin session with HTTP-only cookies.
 - Admin routes are not linked from public navigation and are marked `noindex, nofollow, noarchive`.
+- Hidden `/desk` room with a Claude Code-style terminal surface, local slash commands, DeepSeek-backed chat turns, and validated A2UI schema rendering.
 - SQLite + Prisma persistence for a simple personal publishing workflow.
 - Dockerfile and docker-compose for deployment experiments.
 
@@ -77,6 +94,7 @@ Create a local `.env` file:
 DATABASE_URL="file:./dev.db"
 ADMIN_PASSWORD="change-me"
 AUTH_SECRET="replace-with-a-long-random-string"
+DEEPSEEK_API_KEY="optional-for-desk-agent"
 ```
 
 Initialize the database:
@@ -96,6 +114,13 @@ Open:
 
 - Public site: `http://localhost:3000`
 - Admin login: `http://localhost:3000/admin/login`
+- Hidden desk: `http://localhost:3000/desk`
+
+`/desk` works without `DEEPSEEK_API_KEY` for local slash commands such as
+`/help`, `/show examples`, `/show lab`, and `/clear`. Ordinary prompts call
+`/api/desk/agent`, which keeps the DeepSeek key server-side and only renders a
+small allowlisted A2UI JSON shape: note, artifact list, decision matrix, or
+command hints. Model-provided HTML, CSS, and scripts are not rendered.
 
 ## Scripts
 
